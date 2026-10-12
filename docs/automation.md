@@ -64,6 +64,29 @@ GraphQL、PR 搜索、Release、RSS 请求失败时都会报错，全部网络�
 
 ## 配置与标记
 
+### 贡献数与个人主页不一致
+
+贡献图读取 GitHub GraphQL `contributionCalendar`，不使用 Events API 估算，
+也不把其他统计数字补进日历。README 和 SVG 总数采用同一份日历数据。
+Token 能读取的范围可能与账号本人登录后看到的主页不同；默认仓库
+`GITHUB_TOKEN` 不能读取其他私有仓库。仅修改总数会导致热力图和连续记录失真。
+
+若希望包含私有贡献：
+
+1. 检查 GitHub 个人主页的 Contribution settings → Private contributions 设置。
+   开启后会公开匿名贡献数量，但不会公开私有仓库名称。
+2. 必要时创建能读取相关仓库贡献的 Token，使用满足需求的最小权限；
+   精细粒度 Token 的仓库范围、组织审批与 SSO 授权也会影响可见性。
+3. 在此仓库 Settings → Secrets and variables → Actions 中添加
+   **Secret** `CONTRIBUTIONS_TOKEN`。不要放入 Variables、源码或 README。
+4. 手动运行工作流，比较同一时间范围的主页与日历结果。
+
+此 Token 仅用于 GraphQL 贡献查询；公开项目请求和提交仍使用自带 `GITHUB_TOKEN`。
+未设置时回退到自带 Token；已设置但请求失败时会报错，不偷偷回退。
+本地运行同样可以通过 `CONTRIBUTIONS_TOKEN` 环境变量提供。
+API 可见性、时间范围和数据刷新延迟仍可能造成差异，配置 Token 不保证与任何
+登录视图完全一致。蛇动画默认直接展示，不使用折叠区。
+
 编辑根目录 `profile.config.json`：
 
 - `featuredRepositories`：仓库名称数组，默认精选 `Solutions`、`pupu`、`antelope`。

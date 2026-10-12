@@ -110,6 +110,11 @@ test('contribution API never substitutes events for contributions or hides Graph
     errors: [{ message: 'Denied' }],
   })), /Denied/);
   await assert.rejects(fetchCalendar('example', 'fixture-token', async () => ({ data: { user: null } })), /未返回/);
+  await assert.rejects(fetchCalendar('example', 'fixture-token', async () => ({
+    data: { user: { contributionsCollection: {
+      contributionCalendar: { ...calendar, totalContributions: 557 },
+    } } },
+  })), /与每日合计 9 不一致/);
 });
 
 test('RSS and Atom parse single/multiple entries with dates and alternate links', () => {
@@ -233,6 +238,9 @@ test('full update writes every section and chart; repeated update is unchanged; 
     assert.ok(result.endsWith('\nSTATIC END\n'));
     assert.doesNotMatch(result, /\nold\n/);
     assert.match(result, /contributions\.svg/);
+    assert.match(result, /查询 Token 可见的 \*\*9\*\* 次贡献/);
+    assert.match(result, /### 🐍 贡献蛇动画/);
+    assert.doesNotMatch(result, /<details>|<summary>/);
     assert.match(result, /mailto:public%40example\.com/);
     assert.match(result, /https:\/\/example\.com/);
     const assetNames = await readdir(join(directory, 'assets'));
@@ -250,6 +258,12 @@ test('full update writes every section and chart; repeated update is unchanged; 
     assert.equal(await readFile(readmePath, 'utf8'), result);
     assert.deepEqual(await Promise.all(assetNames.map((name) =>
       readFile(join(directory, 'assets', name), 'utf8'))), previousAssets);
+    let contributionRequested = false;
+    assert.equal(await updateReadme({
+      ...options, token: '', contributionsToken: 'dedicated-fixture-token',
+      graphql: async () => { contributionRequested = true; return graphql(); },
+    }), false);
+    assert.equal(contributionRequested, true);
   } finally {
     await rm(directory, { recursive: true });
   }

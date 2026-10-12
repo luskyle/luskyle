@@ -173,12 +173,17 @@ export function renderPullRequests(items) {
 export async function fetchCalendar(username, token, graphql = (body) => githubRequest('/graphql', token, fetch, body)) {
   if (!token) return null;
   const data = await graphql({
-    query: 'query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } } } } }',
+    query: 'query($login: String!) { user(login: $login) { contributionsCollection { restrictedContributionsCount contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } } } } }',
     variables: { login: username },
   });
   if (data.errors?.length) throw new Error(`贡献数据请求失败：${data.errors.map((error) => error.message).join('; ')}`);
   const calendar = data.data?.user?.contributionsCollection?.contributionCalendar;
   if (!calendar) throw new Error('GitHub GraphQL 未返回贡献日历。');
+  const dailyTotal = calendar.weeks.flatMap((week) => week.contributionDays)
+    .reduce((sum, day) => sum + day.contributionCount, 0);
+  if (dailyTotal !== calendar.totalContributions) {
+    throw new Error(`贡献日历总数 ${calendar.totalContributions} 与每日合计 ${dailyTotal} 不一致。`);
+  }
   return calendar;
 }
 
@@ -249,6 +254,7 @@ export async function updateReadme({
   username = process.env.PROFILE_USERNAME || process.env.GITHUB_REPOSITORY_OWNER || 'luskyle',
   token = process.env.GITHUB_TOKEN,
   readmePath = defaultReadme,
+  contributionsToken = process.env.CONTRIBUTIONS_TOKEN || token,
   request = (path) => githubRequest(path, token),
   configPath = defaultConfig,
   config,
@@ -279,7 +285,7 @@ export async function updateReadme({
   }
   const pullRequests = await request(`/search/issues?q=${encodeURIComponent(`is:pr author:${username} is:public`)}&sort=updated&order=desc&per_page=5`);
   if (pullRequests.incomplete_results) throw new Error('GitHub PR 搜索返回不完整结果，请稍后重试。');
-  const calendar = await fetchCalendar(username, token, graphql);
+  const calendar = await fetchCalendar(username, contributionsToken, graphql);
   const articles = await fetchArticles(config.rssFeeds, feedFetch);
   const streaks = calendar ? contributionStreaks(calendar) : null;
   const sections = {
@@ -292,8 +298,8 @@ export async function updateReadme({
     PULL_REQUESTS: renderPullRequests(pullRequests.items),
     BLOG: renderBlog(articles, config.rssFeeds.length > 0),
     CONTRIBUTIONS: calendar
-      ? `![过去一年贡献日历](./assets/contributions.svg)\n\n过去一年 **${calendar.totalContributions}** 次贡献 · 当前连续 **${streaks.current}** 天 · 最长连续 **${streaks.longest}** 天（此日历范围内）。\n\n<details>\n<summary>🐍 贡献蛇动画</summary>\n\n![沿近期活跃日期移动的装饰动画](./assets/snake.svg)\n\n动画沿近期活跃日期移动，不表示提交顺序；不支持 SVG 动画的客户端会显示静态日历。\n\n</details>`
-      : '未配置 `GITHUB_TOKEN`，无法读取贡献日历及连续记录。工作流会使用自带 Token 自动生成；本地请通过环境变量提供 Token。',
+      ? `![过去一年贡献日历](./assets/contributions.svg)\n\n过去一年查询 Token 可见的 **${calendar.totalContributions}** 次贡献 · 当前连续 **${streaks.current}** 天 · 最长连续 **${streaks.longest}** 天（此日历范围内）。\n\n统计来自 GitHub GraphQL，每天贡献数与日历一致。私有贡献可见性取决于 Token 权限和个人资料设置，可能与本人登录后的主页总数不同；配置方法见[自动更新说明](./docs/automation.md#贡献数与个人主页不一致)。\n\n### 🐍 贡献蛇动画\n\n![沿近期活跃日期移动的装饰动画](./assets/snake.svg)\n\n动画沿近期活跃日期移动，不表示提交顺序；不支持 SVG 动画的客户端会显示静态日历。`
+      : '未配置 `GITHUB_TOKEN` 或 `CONTRIBUTIONS_TOKEN`，无法读取贡献日历及连续记录。工作流会使用自带 Token 自动生成；本地请通过环境变量提供 Token。',
     ABOUT: `- **关注方向：** ${escapeMarkdown(config.focus) || '待补充'}\n- **正在做：** ${escapeMarkdown(config.workingOn) || '维护下方列出的公开项目；具体计划待补充。'}\n- **正在学：** ${escapeMarkdown(config.learning) || '待补充（不根据仓库语言推断学习计划）。'}`,
     CONTACT: `[GitHub · ${escapeMarkdown(user.login)}](https://github.com/${user.login})` +
       (user.email ? ` · [公开邮箱](mailto:${encodeURIComponent(user.email)})` : '') +

@@ -44,6 +44,7 @@ jobs:
         run: node scripts/update-readme.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          CONTRIBUTIONS_TOKEN: ${{ secrets.CONTRIBUTIONS_TOKEN }}
           PROFILE_USERNAME: ${{ github.repository_owner }}
       - name: Commit changed README
         run: |

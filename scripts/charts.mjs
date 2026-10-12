@@ -107,9 +107,9 @@ export function renderCalendar(calendar, animated = false) {
     ? Array.from({ length: 6 }, (_, index) =>
       `<circle r="${index === 5 ? 5 : 3.5}" fill="${index === 5 ? '#fbbf24' : '#38bdf8'}" opacity="${0.3 + index * 0.14}"><animateMotion begin="-${index * 0.12}s" dur="16s" repeatCount="indefinite" path="${path}"/></circle>`).join('')
     : '';
-  return svg(title, `${calendar.totalContributions} contributions. Current streak ${current} days; longest ${longest} days. Animation follows recent active cells, not commit order.`,
+  return svg(title, `${calendar.totalContributions} token-visible contributions. Current streak ${current} days; longest ${longest} days. Private contributions depend on token access. Animation follows recent active cells, not commit order.`,
     width, 245, text(24, 35, title, 21) +
-    text(24, 60, `${calendar.totalContributions} contributions · current streak ${current}d · longest ${longest}d`, 13, '#94a3b8') +
+    text(24, 60, `${calendar.totalContributions} token-visible contributions · current ${current}d · longest ${longest}d`, 13, '#94a3b8') +
     cells + animation + text(24, 225, animated
       ? 'Animated trail through recent active days · decorative, not commit order'
       : `${days[0]?.date ?? ''} — ${days.at(-1)?.date ?? ''} · GitHub contribution counts`, 12, '#94a3b8'));
