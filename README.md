@@ -103,7 +103,7 @@
 <!-- CONTRIBUTIONS:START -->
 ![过去一年贡献日历](./assets/contributions.svg)
 
-过去一年查询 Token 可见的 **443** 次贡献 · 当前连续 **1** 天 · 最长连续 **4** 天（此日历范围内）。
+过去一年查询 Token 可见的 **444** 次贡献 · 当前连续 **1** 天 · 最长连续 **4** 天（此日历范围内）。
 
 统计来自 GitHub GraphQL，每天贡献数与日历一致。私有贡献可见性取决于 Token 权限和个人资料设置，可能与本人登录后的主页总数不同；配置方法见[自动更新说明](./docs/automation.md#贡献数与个人主页不一致)。
 
@@ -132,8 +132,8 @@
 <!-- ACTIVITY:START -->
 - 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
 - 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
+- 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
 - 2026-10-12 · 创建 branch `main` · [luskyle/luskyle](https://github.com/luskyle/luskyle)
-- 2026-10-10 · 推送代码到 [luskyle/pupu](https://github.com/luskyle/pupu)
 - 2026-10-10 · 推送代码到 [luskyle/pupu](https://github.com/luskyle/pupu)
 <!-- ACTIVITY:END -->
 
