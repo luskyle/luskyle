@@ -9,7 +9,7 @@ import {
   fetchCalendar, parseFeed, fetchArticles, renderBlog, updateReadme, sectionNames,
 } from '../scripts/update-readme.mjs';
 import {
-  escapeXml, renderBars, renderAssets, contributionStreaks, renderCalendar,
+  escapeXml, renderBars, renderAssets, contributionStreaks, renderCalendar, renderBanner,
 } from '../scripts/charts.mjs';
 
 const config = {
@@ -193,6 +193,22 @@ test('language graph counts original primary-language repos, not stars or forks'
   ], [], null, config);
   assert.match(assets['languages.svg'], /C\+\+: 1; Python: 1/);
   assert.equal(Object.keys(assets).length, 5);
+});
+
+test('redesigned banner uses a circuit monogram, escapes names and fits longer names', () => {
+  const banner = renderBanner({ login: 'luskyle', name: 'Luskyle' });
+  assert.equal(XMLValidator.validate(banner), true);
+  assert.match(banner, /viewBox="0 0 960 280"/);
+  assert.match(banner, />LK<\/text>/);
+  assert.match(banner, /id="grid"/);
+  assert.match(banner, /id="typing"/);
+  assert.doesNotMatch(banner, /cx="870"|<image|<script/);
+  const escaped = renderBanner({ login: 'example', name: '<A & B>' });
+  assert.match(escaped, /&lt;A &amp; B&gt;/);
+  assert.match(escaped, />EX<\/text>/);
+  const long = renderBanner({ login: 'example', name: 'A'.repeat(50) });
+  assert.match(long, /font-size="16\.615/);
+  assert.equal(XMLValidator.validate(long), true);
 });
 
 test('full update writes every section and chart; repeated update is unchanged; failure preserves files', async () => {

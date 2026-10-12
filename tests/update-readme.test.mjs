@@ -119,7 +119,7 @@ test('end-to-end update paginates, preserves static text and is idempotent', asy
     const paths = [];
     const request = async (path) => {
       paths.push(path);
-      if (path === '/users/example') return { public_repos: 101, followers: 2, following: 3 };
+      if (path === '/users/example') return { login: 'example', public_repos: 101, followers: 2, following: 3 };
       if (path.includes('/repos?')) return path.endsWith('page=1') ? Array(100).fill(repo()) : [repo()];
       if (path.includes('/events/public?')) return [];
       if (path.includes('/releases?')) return [];

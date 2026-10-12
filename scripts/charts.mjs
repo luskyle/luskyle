@@ -17,6 +17,40 @@ function text(x, y, value, size = 14, fill = '#e2e8f0') {
   return `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}">${escapeXml(value)}</text>`;
 }
 
+export function renderBanner(user) {
+  const name = user.name || user.login;
+  const monogram = user.login.toLowerCase() === 'luskyle' ? 'LK' : user.login.slice(0, 2).toUpperCase();
+  const nameSize = Math.min(44, 540 / Math.max(1, Array.from(name).length) / 0.65);
+  return svg(`Hello, ${name}`, `${name}'s open-source workshop. Developer tools and browser extensions. Circuit-style ${monogram} monogram.`, 960, 280,
+    `<defs>
+<linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111e36"/><stop offset="1" stop-color="#0b1220"/></linearGradient>
+<linearGradient id="accent"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#34d399"/></linearGradient>
+<pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#334155" stroke-opacity=".22"/></pattern>
+<clipPath id="typing"><rect x="40" y="143" width="530" height="30"><animate attributeName="width" values="0;530;530;0" keyTimes="0;.4;.9;1" dur="10s" repeatCount="indefinite"/></rect></clipPath>
+</defs>
+<rect width="960" height="280" rx="20" fill="url(#surface)"/>
+<rect x="625" y="16" width="319" height="248" rx="16" fill="url(#grid)"/>
+<rect x="40" y="35" width="4" height="16" rx="2" fill="#34d399"/>
+${text(56, 48, 'THE OPEN-SOURCE WORKSHOP', 12, '#94a3b8')}
+${text(40, 84, "Hi, I'm", 18, '#94a3b8')}
+${text(40, 131, name, nameSize)}
+<g clip-path="url(#typing)">${text(40, 164, 'BUILD · SHARE · KEEP EXPLORING', 18, '#38bdf8')}</g>
+${text(40, 201, 'Developer tools / Browser extensions', 15, '#cbd5e1')}
+<rect x="40" y="226" width="104" height="27" rx="7" fill="#172a3c"/>
+${text(52, 244, 'OPEN SOURCE', 11, '#7dd3fc')}
+<rect x="154" y="226" width="105" height="27" rx="7" fill="#14312e"/>
+${text(166, 244, 'KEEP BUILDING', 11, '#6ee7b7')}
+<g fill="none" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".75">
+<path d="M720 109H680L657 86H638M720 139H655M720 169H680L650 199H638M836 109H862L886 85H918M836 139H918M836 169H865L894 198H918M756 81V57L734 35M800 81V52H827M756 197V224H730M800 197V237H829"/>
+</g>
+<g fill="#38bdf8"><circle cx="638" cy="86" r="3"/><circle cx="655" cy="139" r="3"/><circle cx="638" cy="199" r="3"/><circle cx="918" cy="85" r="3"/><circle cx="918" cy="139" r="3"/><circle cx="918" cy="198" r="3"/></g>
+<rect x="720" y="81" width="116" height="116" rx="22" fill="#122235" stroke="url(#accent)" stroke-width="2"/>
+<rect x="730" y="91" width="96" height="96" rx="15" fill="#0f172a" stroke="#334155"/>
+<text x="778" y="151" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="42" fill="#e2e8f0">${escapeXml(monogram)}</text>
+<rect x="765" y="166" width="26" height="3" rx="1.5" fill="#34d399"/>
+${text(748, 262, '</>  CREATE', 12, '#94a3b8')}`);
+}
+
 export function renderBars(title, subtitle, entries) {
   const rows = entries.slice(0, 8);
   const max = Math.max(1, ...rows.map(([, value]) => value));
@@ -96,13 +130,7 @@ export function renderAssets(user, repositories, events, calendar, config) {
   }
   const labels = ['Days 22–28', 'Days 15–21', 'Days 8–14', 'Days 1–7'];
   return {
-    'banner.svg': svg(`Hello, ${user.name || user.login}`, 'Open source projects, tools and experiments', 960, 210,
-      `<circle cx="870" cy="100" r="70" fill="#1e293b"/><circle cx="870" cy="100" r="45" fill="none" stroke="#38bdf8" stroke-width="3"/>` +
-      text(36, 75, `Hi, I'm ${user.name || user.login}`, 38) +
-      `<defs><clipPath id="typing"><rect x="36" y="95" width="520" height="35"><animate attributeName="width" values="0;520;520;0" keyTimes="0;0.45;0.85;1" dur="8s" repeatCount="indefinite"/></rect></clipPath></defs>` +
-      `<g clip-path="url(#typing)">${text(36, 120, 'BUILD · SHARE · KEEP EXPLORING', 19, '#38bdf8')}</g>` +
-      text(36, 165, 'Open source / Developer tools / Browser extensions', 16, '#94a3b8') +
-      `<rect x="36" y="181" width="10" height="4" fill="#34d399"><animate attributeName="width" values="10;520;10" dur="8s" repeatCount="indefinite"/></rect>`),
+    'banner.svg': renderBanner(user),
     'stack.svg': svg('Technology Toolbox', config.technologyLabels.join(', '), 960, 105,
       config.technologyLabels.map((label, index) =>
         `<rect x="${20 + index * 153}" y="30" width="142" height="45" rx="12" fill="#1e293b"/>` +
