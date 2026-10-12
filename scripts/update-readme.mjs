@@ -118,6 +118,9 @@ export async function githubRequest(path, token, fetchImpl = fetch, body) {
 }
 
 export function validateConfig(config) {
+  if (config.featuredSource !== undefined && !['manual', 'pinned'].includes(config.featuredSource)) {
+    throw new Error('featuredSource 必须是 manual 或 pinned。');
+  }
   for (const key of ['featuredRepositories', 'rssFeeds', 'technologyLabels']) {
     if (!Array.isArray(config[key]) || !config[key].every((value) => typeof value === 'string')) {
       throw new Error(`配置 ${key} 必须是字符串数组。`);
@@ -136,13 +139,49 @@ export function validateConfig(config) {
   return config;
 }
 
+function renderFeaturedCard(repo) {
+  return `### [${escapeMarkdown(repo.full_name || repo.name)}](${repo.html_url})\n\n${escapeMarkdown(repo.description) || '暂未填写仓库简介。'}\n\n**${escapeMarkdown(repo.language) || '资料 / 文档'}** · ⭐ ${repo.stargazers_count} · Forks ${repo.forks_count ?? 0}`;
+}
+
 export function renderFeatured(repositories, names) {
   if (!names.length) return '尚未配置精选项目。';
   return names.map((name) => {
     const repo = repositories.find((item) => item.name.toLowerCase() === name.toLowerCase());
     if (!repo) throw new Error(`精选仓库 ${name} 不存在或不是此账号的公开仓库。`);
-    return `### [${escapeMarkdown(repo.name)}](${repo.html_url})\n\n${escapeMarkdown(repo.description) || '暂未填写仓库简介。'}\n\n**${escapeMarkdown(repo.language) || '资料 / 文档'}** · ⭐ ${repo.stargazers_count} · Forks ${repo.forks_count ?? 0}`;
+    return renderFeaturedCard(repo);
   }).join('\n\n');
+}
+
+export async function fetchPinnedRepositories(username, token, graphql = (body) => githubRequest('/graphql', token, fetch, body)) {
+  if (!token) throw new Error('读取 GitHub 置顶仓库需要 GITHUB_TOKEN。');
+  const result = await graphql({
+    query: 'query($login: String!) { user(login: $login) { pinnedItems(first: 6, types: REPOSITORY) { nodes { ... on Repository { name nameWithOwner url description primaryLanguage { name } stargazerCount forkCount isPrivate } } } } }',
+    variables: { login: username },
+  });
+  if (result.errors?.length) {
+    throw new Error(`置顶仓库请求失败：${result.errors.map((error) => error.message).join('; ')}`);
+  }
+  const nodes = result.data?.user?.pinnedItems?.nodes;
+  if (!Array.isArray(nodes) || nodes.some((node) => !node || typeof node.isPrivate !== 'boolean' ||
+    typeof node.nameWithOwner !== 'string' || typeof node.url !== 'string' ||
+    !Number.isInteger(node.stargazerCount) || !Number.isInteger(node.forkCount))) {
+    throw new Error('GitHub GraphQL 未返回有效的置顶仓库列表。');
+  }
+  return nodes.filter((repo) => !repo.isPrivate).map((repo) => ({
+    name: repo.name,
+    full_name: repo.nameWithOwner,
+    html_url: repo.url,
+    description: repo.description,
+    language: repo.primaryLanguage?.name ?? null,
+    stargazers_count: repo.stargazerCount,
+    forks_count: repo.forkCount,
+  }));
+}
+
+export function renderPinnedRepositories(repositories) {
+  return repositories.length
+    ? '跟随 GitHub 主页置顶仓库，按置顶顺序展示。\n\n' + repositories.map(renderFeaturedCard).join('\n\n')
+    : 'GitHub 主页暂无公开置顶仓库。可在主页 Customize your pins 中设置。';
 }
 
 export function renderRecent(repositories) {
@@ -259,6 +298,7 @@ export async function updateReadme({
   configPath = defaultConfig,
   config,
   graphql,
+  pinnedGraphql,
   feedFetch = fetch,
 } = {}) {
   if (!/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(username)) {
@@ -286,13 +326,18 @@ export async function updateReadme({
   const pullRequests = await request(`/search/issues?q=${encodeURIComponent(`is:pr author:${username} is:public`)}&sort=updated&order=desc&per_page=5`);
   if (pullRequests.incomplete_results) throw new Error('GitHub PR 搜索返回不完整结果，请稍后重试。');
   const calendar = await fetchCalendar(username, contributionsToken, graphql);
+  const pinned = config.featuredSource === 'pinned'
+    ? await fetchPinnedRepositories(username, token, pinnedGraphql)
+    : null;
   const articles = await fetchArticles(config.rssFeeds, feedFetch);
   const streaks = calendar ? contributionStreaks(calendar) : null;
   const sections = {
     PROFILE: renderProfile(user, repositories),
     REPOSITORIES: renderRepositories(repositories),
     ACTIVITY: renderActivity(events),
-    FEATURED: renderFeatured(repositories, config.featuredRepositories),
+    FEATURED: pinned === null
+      ? renderFeatured(repositories, config.featuredRepositories)
+      : renderPinnedRepositories(pinned),
     RECENT: renderRecent(repositories),
     RELEASES: renderReleases(releases),
     PULL_REQUESTS: renderPullRequests(pullRequests.items),

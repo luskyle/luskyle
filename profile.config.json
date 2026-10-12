@@ -1,5 +1,6 @@
 {
-  "featuredRepositories": ["Solutions", "pupu", "antelope"],
+  "featuredSource": "pinned",
+  "featuredRepositories": [],
   "rssFeeds": [],
   "technologyLabels": ["C / C++", "C#", "Python", "TypeScript", "JavaScript", "GitHub Actions"],
   "focus": "工控 / 上位机开发素材、开发工具与浏览器扩展",

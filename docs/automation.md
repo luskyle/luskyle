@@ -26,7 +26,9 @@
 - 最近活动：从 GitHub 返回的最近 100 条公开事件中按时间倒序展示最多 5 条受支持的事件，
   包括 Push、PR、Issue、评论、Release、Star、Fork 和创建事件。
   Events API 有延迟及时间/数量限制，不等同于完整贡献历史或实时动态。
-- 精选项目：读取配置中的仓库，展示真实简介、主要语言、Star 和 Fork 数。
+- 精选项目：默认读取 GitHub 主页的公开置顶仓库，按置顶顺序展示最多 6 个，
+  自动更新简介、主要语言、Star 和 Fork 数。保留置顶的 Fork、归档仓库和其他所有者的仓库；
+  不套用热门仓库的筛选规则。不读取置顶 Gist。
 - 最近维护：最多 3 个未归档的公开原创仓库，按 `pushed_at`（最近推送时间）排序。
 - 最新发布：检查所有公开原创仓库各自最近 5 条 Release，排除草稿、预发布，
   合并后展示最新 5 条正式发布。不是全部版本历史。
@@ -89,13 +91,20 @@ API 可见性、时间范围和数据刷新延迟仍可能造成差异，配置 
 
 编辑根目录 `profile.config.json`：
 
-- `featuredRepositories`：仓库名称数组，默认精选 `Solutions`、`pupu`、`antelope`。
+- `featuredSource`：默认 `pinned`，通过 GraphQL 跟随主页 Customize your pins 设置。
+  调整置顶后，下次定时更新或手动运行会同步到 README，无需修改配置。
+  没有公开置顶仓库时明确显示暂无，不回退到热门或旧名单。
+  此查询使用 `GITHUB_TOKEN`（工作流自带），不使用专门的贡献 Token；
+  本地需要设置 `GITHUB_TOKEN`，缺少 Token 或 API 请求失败时会报错并保留已有内容。
+- `featuredRepositories`：仅在 `featuredSource` 为 `manual` 时使用的仓库名称数组。
   配置中的仓库必须是当前账号可读取的公开仓库；不存在时脚本报错。
+  为兼容旧配置，未填写 `featuredSource` 时仍按手动名单展示。
 - `rssFeeds`：博客 RSS / Atom 的 HTTPS 地址数组，默认空数组。
 - `technologyLabels`：最多 6 个技术栈标签。
 - `focus`、`workingOn`、`learning`：个人关注方向、正在做和正在学的文字。
 
-技术栈是展示标签，不自动推断熟练度。切换账号时应同步调整精选仓库和静态介绍。
+技术栈是展示标签，不自动推断熟练度。切换账号时请调整静态介绍；
+置顶模式自动读取新账号的置顶列表，手动模式需同步调整精选名单。
 不要把私人邮箱、令牌或其他秘密写入公开配置文件。
 
 可自由编辑 README 标记区域外的内容。以下标记必须各自唯一、起止顺序正确：

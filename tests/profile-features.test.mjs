@@ -7,6 +7,7 @@ import { XMLValidator } from 'fast-xml-parser';
 import {
   validateConfig, renderFeatured, renderRecent, renderReleases, renderPullRequests,
   fetchCalendar, parseFeed, fetchArticles, renderBlog, updateReadme, sectionNames,
+  fetchPinnedRepositories, renderPinnedRepositories,
 } from '../scripts/update-readme.mjs';
 import {
   escapeXml, renderBars, renderAssets, contributionStreaks, renderCalendar, renderBanner,
@@ -47,9 +48,57 @@ test('profile configuration validates arrays, safe repo names and HTTPS feeds', 
     { featuredRepositories: null }, { featuredRepositories: ['../secret'] },
     { rssFeeds: ['http://example.com/feed'] }, { rssFeeds: ['file:///etc/passwd'] },
     { technologyLabels: Array(7).fill('JS') }, { learning: 42 },
+    { featuredSource: 'unknown' },
   ]) {
     assert.throws(() => validateConfig({ ...config, ...invalid }));
   }
+});
+
+const pinnedNode = (overrides = {}) => ({
+  name: 'demo', nameWithOwner: 'example/demo', url: 'https://github.com/example/demo',
+  description: 'Pinned <&> project', primaryLanguage: { name: 'C++' },
+  stargazerCount: 3, forkCount: 1, isPrivate: false, ...overrides,
+});
+const pinnedResult = (nodes) => ({ data: { user: { pinnedItems: { nodes } } } });
+
+test('pinned repositories preserve order and include other owners and fork/archive pins', async () => {
+  const nodes = [
+    pinnedNode({ nameWithOwner: 'other/demo', url: 'https://github.com/other/demo', isFork: true, isArchived: true }),
+    pinnedNode(),
+    pinnedNode({ name: 'private', nameWithOwner: 'example/private', isPrivate: true }),
+    pinnedNode({ name: 'docs', nameWithOwner: 'example/docs', primaryLanguage: null, description: null }),
+  ];
+  const repos = await fetchPinnedRepositories('example', 'fixture-token', async (body) => {
+    assert.deepEqual(body.variables, { login: 'example' });
+    assert.match(body.query, /first: 6, types: REPOSITORY/);
+    return pinnedResult(nodes);
+  });
+  assert.deepEqual(repos.map((repo) => repo.full_name), ['other/demo', 'example/demo', 'example/docs']);
+  assert.equal(repos[0].language, 'C++');
+  assert.equal(repos[2].language, null);
+  const output = renderPinnedRepositories(repos);
+  assert.ok(output.indexOf('[other/demo]') < output.indexOf('[example/demo]'));
+  assert.ok(output.includes('&lt;&amp;&gt;'));
+  assert.match(output, /⭐ 3 · Forks 1/);
+  assert.doesNotMatch(output, /example\/private/);
+  assert.match(output, /资料 \/ 文档/);
+});
+
+test('empty pins are distinct from missing token, GraphQL errors and malformed responses', async () => {
+  assert.deepEqual(await fetchPinnedRepositories('example', 'fixture-token', async () => pinnedResult([])), []);
+  assert.match(renderPinnedRepositories([]), /暂无公开置顶仓库/);
+  await assert.rejects(fetchPinnedRepositories('example', '', () => {
+    throw new Error('Must not request');
+  }), /需要 GITHUB_TOKEN/);
+  for (const result of [
+    {}, { data: { user: null } }, pinnedResult([null]),
+    pinnedResult([pinnedNode({ isPrivate: undefined })]),
+  ]) {
+    await assert.rejects(fetchPinnedRepositories('example', 'fixture-token', async () => result), /有效的置顶/);
+  }
+  await assert.rejects(fetchPinnedRepositories('example', 'fixture-token', async () => ({
+    ...pinnedResult([pinnedNode()]), errors: [{ message: 'Denied' }],
+  })), /置顶仓库请求失败：Denied/);
 });
 
 test('featured cards resolve configured repos and escape Markdown', () => {
@@ -264,6 +313,24 @@ test('full update writes every section and chart; repeated update is unchanged; 
       graphql: async () => { contributionRequested = true; return graphql(); },
     }), false);
     assert.equal(contributionRequested, true);
+    const pinnedOptions = {
+      ...options, config: { ...config, featuredSource: 'pinned', featuredRepositories: ['missing'] },
+      pinnedGraphql: async () => pinnedResult([pinnedNode({ nameWithOwner: 'other/demo' }), pinnedNode()]),
+    };
+    assert.equal(await updateReadme(pinnedOptions), true);
+    const pinnedReadme = await readFile(readmePath, 'utf8');
+    assert.ok(pinnedReadme.indexOf('[other/demo]') < pinnedReadme.indexOf('[example/demo]'));
+    assert.equal(await updateReadme(pinnedOptions), false);
+    await assert.rejects(updateReadme({
+      ...pinnedOptions, pinnedGraphql: async () => ({ errors: [{ message: 'Pins unavailable' }] }),
+    }), /Pins unavailable/);
+    assert.equal(await readFile(readmePath, 'utf8'), pinnedReadme);
+    assert.deepEqual(await Promise.all(assetNames.map((name) =>
+      readFile(join(directory, 'assets', name), 'utf8'))), previousAssets);
+    assert.equal(await updateReadme({
+      ...pinnedOptions, pinnedGraphql: async () => pinnedResult([]),
+    }), true);
+    assert.match(await readFile(readmePath, 'utf8'), /暂无公开置顶仓库/);
   } finally {
     await rm(directory, { recursive: true });
   }
