@@ -103,7 +103,7 @@
 <!-- CONTRIBUTIONS:START -->
 ![过去一年贡献日历](./assets/contributions.svg)
 
-过去一年 **441** 次贡献 · 当前连续 **1** 天 · 最长连续 **4** 天（此日历范围内）。
+过去一年 **442** 次贡献 · 当前连续 **1** 天 · 最长连续 **4** 天（此日历范围内）。
 
 <details>
 <summary>🐍 贡献蛇动画</summary>
@@ -121,7 +121,7 @@
 | 仓库 | 简介 | 语言 | Stars |
 | --- | --- | --- | ---: |
 | [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | — | 13 |
-| [luskyle](https://github.com/luskyle/luskyle) | — | — | 0 |
+| [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
 | [pupu](https://github.com/luskyle/pupu) | 一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。 | TypeScript | 0 |
 | [antelope](https://github.com/luskyle/antelope) | 小巧敏捷的 C/C++ 编译链接工具。用一份或多份 JSON 配置描述构建目标，把项目编成静态库、共享库或可执行程序；不生成 makefile，也不引入额外的构建语言。最重要的是，你可以与cmake说拜拜了 | Python | 0 |
 | [qiuniu](https://github.com/luskyle/qiuniu) | — | JavaScript | 0 |
@@ -131,11 +131,11 @@
 ## 📝 最近公开活动
 
 <!-- ACTIVITY:START -->
+- 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
 - 2026-10-12 · 创建 branch `main` · [luskyle/luskyle](https://github.com/luskyle/luskyle)
 - 2026-10-10 · 推送代码到 [luskyle/pupu](https://github.com/luskyle/pupu)
 - 2026-10-10 · 推送代码到 [luskyle/pupu](https://github.com/luskyle/pupu)
 - 2026-10-10 · Star [espressif/esp-idf](https://github.com/espressif/esp-idf)
-- 2026-10-10 · 推送代码到 [luskyle/antelope](https://github.com/luskyle/antelope)
 <!-- ACTIVITY:END -->
 
 ## 📬 联系我
