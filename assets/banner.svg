@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="210" viewBox="0 0 960 210" role="img" aria-labelledby="title desc">
+<title id="title">Hello, Luskyle</title><desc id="desc">Open source projects, tools and experiments</desc>
+<rect width="960" height="210" rx="20" fill="#0f172a"/>
+<g font-family="Arial, sans-serif" fill="#e2e8f0"><circle cx="870" cy="100" r="70" fill="#1e293b"/><circle cx="870" cy="100" r="45" fill="none" stroke="#38bdf8" stroke-width="3"/><text x="36" y="75" font-size="38" fill="#e2e8f0">Hi, I&apos;m Luskyle</text><defs><clipPath id="typing"><rect x="36" y="95" width="520" height="35"><animate attributeName="width" values="0;520;520;0" keyTimes="0;0.45;0.85;1" dur="8s" repeatCount="indefinite"/></rect></clipPath></defs><g clip-path="url(#typing)"><text x="36" y="120" font-size="19" fill="#38bdf8">BUILD · SHARE · KEEP EXPLORING</text></g><text x="36" y="165" font-size="16" fill="#94a3b8">Open source / Developer tools / Browser extensions</text><rect x="36" y="181" width="10" height="4" fill="#34d399"><animate attributeName="width" values="10;520;10" dur="8s" repeatCount="indefinite"/></rect></g>
+</svg>

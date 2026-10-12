@@ -1,0 +1,15 @@
+{
+  "name": "luskyle-profile-readme",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "update": "node scripts/update-readme.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.11.2"
+  }
+}
