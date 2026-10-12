@@ -103,7 +103,7 @@
 <!-- CONTRIBUTIONS:START -->
 ![过去一年贡献日历](./assets/contributions.svg)
 
-过去一年 **442** 次贡献 · 当前连续 **1** 天 · 最长连续 **4** 天（此日历范围内）。
+过去一年 **443** 次贡献 · 当前连续 **1** 天 · 最长连续 **4** 天（此日历范围内）。
 
 <details>
 <summary>🐍 贡献蛇动画</summary>
@@ -132,10 +132,10 @@
 
 <!-- ACTIVITY:START -->
 - 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
+- 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
 - 2026-10-12 · 创建 branch `main` · [luskyle/luskyle](https://github.com/luskyle/luskyle)
 - 2026-10-10 · 推送代码到 [luskyle/pupu](https://github.com/luskyle/pupu)
 - 2026-10-10 · 推送代码到 [luskyle/pupu](https://github.com/luskyle/pupu)
-- 2026-10-10 · Star [espressif/esp-idf](https://github.com/espressif/esp-idf)
 <!-- ACTIVITY:END -->
 
 ## 📬 联系我
