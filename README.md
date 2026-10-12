@@ -25,23 +25,43 @@
 ## 🌟 精选项目
 
 <!-- FEATURED:START -->
-### [Solutions](https://github.com/luskyle/Solutions)
+跟随 GitHub 主页置顶仓库，按置顶顺序展示。
 
-面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。
+### [luskyle/kicad-mcp](https://github.com/luskyle/kicad-mcp)
 
-**资料 / 文档** · ⭐ 13 · Forks 3
+这是一个带 kicad-mcp 的 KiCad 源码仓库：在标准 KiCad 之上，增加了 MCP（Model Context Protocol）能力 —— 让 AI 助手通过自然语言直接控制 KiCad 绘制/检查/仿真原理图与 PCB，实现"你说电路，AI 画图"。
 
-### [pupu](https://github.com/luskyle/pupu)
+**C++** · ⭐ 0 · Forks 0
+
+### [luskyle/memcoach](https://github.com/luskyle/memcoach)
+
+Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记忆集 / 学习插件）
+
+**Dart** · ⭐ 0 · Forks 0
+
+### [luskyle/pupu](https://github.com/luskyle/pupu)
 
 一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。
 
 **TypeScript** · ⭐ 0 · Forks 1
 
-### [antelope](https://github.com/luskyle/antelope)
+### [luskyle/menuconfig-plusplus](https://github.com/luskyle/menuconfig-plusplus)
+
+从 linux kernel 源码中的 mconf 工具优化改造而来。用于图形化生成项目宏配置。
+
+**C** · ⭐ 0 · Forks 0
+
+### [luskyle/antelope](https://github.com/luskyle/antelope)
 
 小巧敏捷的 C/C++ 编译链接工具。用一份或多份 JSON 配置描述构建目标，把项目编成静态库、共享库或可执行程序；不生成 makefile，也不引入额外的构建语言。最重要的是，你可以与cmake说拜拜了
 
 **Python** · ⭐ 0 · Forks 0
+
+### [luskyle/moz](https://github.com/luskyle/moz)
+
+暂未填写仓库简介。
+
+**C++** · ⭐ 0 · Forks 0
 <!-- FEATURED:END -->
 
 ## 🔨 最近维护
