@@ -82,9 +82,7 @@ test('end-to-end update paginates, preserves static text and is idempotent', asy
     };
     const options = {
       username: 'example', readmePath, request, token: '',
-      config: { featuredRepositories: ['demo'], rssFeeds: [], updates: [
-        { date: '2026-10-13', source: '微博', title: '一条动态', url: 'https://example.com/post' },
-      ],
+      config: { featuredRepositories: ['demo'],
         focus: 'Tools', workingOn: '', learning: '' },
       now: () => new Date('2026-10-13T15:00:00.000Z'),
     };
@@ -94,7 +92,7 @@ test('end-to-end update paginates, preserves static text and is idempotent', asy
     assert.ok(updated.endsWith('\n静态结尾\n'));
     assert.match(updated, /\| 101 \| 2 \| 3 \| 202 \|/);
     assert.match(updated, /文档更新时间：2026-10-13（UTC）/);
-    assert.match(updated, /微博.*一条动态/);
+    assert.doesNotMatch(updated, /最近动态|最新文章|UPDATES:START|BLOG:START/);
     assert.doesNotMatch(updated, /ACTIVITY|PULL_REQUESTS|最近公开活动|最近 Pull Request/);
     assert.ok(paths.some((path) => path.endsWith('page=2')));
     assert.equal(await updateReadme(options), false);

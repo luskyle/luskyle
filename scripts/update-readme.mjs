@@ -8,7 +8,7 @@ const defaultReadme = fileURLToPath(new URL('../README.md', import.meta.url));
 const defaultConfig = fileURLToPath(new URL('../profile.config.json', import.meta.url));
 export const sectionNames = [
   'PROFILE', 'REPOSITORIES', 'FEATURED', 'RECENT', 'RELEASES',
-  'UPDATES', 'BLOG', 'CONTRIBUTIONS', 'COMMITS', 'ABOUT', 'CONTACT', 'DOCUMENT_UPDATED',
+  'CONTRIBUTIONS', 'COMMITS', 'ABOUT', 'CONTACT', 'DOCUMENT_UPDATED',
 ];
 
 export function escapeMarkdown(value) {
@@ -80,34 +80,14 @@ export async function githubRequest(path, token, fetchImpl = fetch, body) {
 }
 
 export function validateConfig(config) {
-  config.updates ??= [];
   if (config.featuredSource !== undefined && !['manual', 'pinned'].includes(config.featuredSource)) {
     throw new Error('featuredSource 必须是 manual 或 pinned。');
   }
-  for (const key of ['featuredRepositories', 'rssFeeds']) {
-    if (!Array.isArray(config[key]) || !config[key].every((value) => typeof value === 'string')) {
-      throw new Error(`配置 ${key} 必须是字符串数组。`);
-    }
+  if (!Array.isArray(config.featuredRepositories) || !config.featuredRepositories.every((value) => typeof value === 'string')) {
+    throw new Error('配置 featuredRepositories 必须是字符串数组。');
   }
   if (!config.featuredRepositories.every((name) => /^[a-z\d_.-]+$/i.test(name))) {
     throw new Error('精选仓库名称无效。');
-  }
-  for (const feed of config.rssFeeds) {
-    if (new URL(feed).protocol !== 'https:') throw new Error('RSS 地址必须使用 HTTPS。');
-  }
-  if (!Array.isArray(config.updates) || config.updates.length > 100) {
-    throw new Error('配置 updates 必须是最多 100 项的数组。');
-  }
-  for (const update of config.updates) {
-    if (!update || typeof update !== 'object' ||
-      !['date', 'source', 'title', 'url'].every((key) => typeof update[key] === 'string' && update[key].trim())) {
-      throw new Error('每条动态必须包含非空的 date、source、title 和 url。');
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(update.date) ||
-      new Date(`${update.date}T00:00:00Z`).toISOString().slice(0, 10) !== update.date) {
-      throw new Error('动态 date 必须是有效的 YYYY-MM-DD 日期。');
-    }
-    if (new URL(update.url).protocol !== 'https:') throw new Error('动态链接必须使用 HTTPS。');
   }
   for (const key of ['focus', 'learning', 'workingOn']) {
     if (typeof config[key] !== 'string') throw new Error(`配置 ${key} 必须是字符串。`);
@@ -256,25 +236,6 @@ export async function fetchArticles(feeds, fetchImpl = fetch) {
   return unique.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0)).slice(0, 5);
 }
 
-export function renderBlog(articles, configured) {
-  if (!configured) return '尚未配置博客 RSS。添加 `profile.config.json` 中的 `rssFeeds` 后，这里将自动展示最新文章。';
-  return articles.length ? articles.map((article) =>
-    `- ${article.timestamp ? new Date(article.timestamp).toISOString().slice(0, 10) : '未提供日期'} · [${escapeMarkdown(article.title)}](<${article.link.replace(/>/g, '%3E')}>)`).join('\n')
-    : '已配置的博客源暂无文章。';
-}
-
-export function renderUpdates(updates) {
-  if (!updates.length) {
-    return '暂无手动维护的动态。可在 `profile.config.json` 的 `updates` 中添加内容。';
-  }
-  return [...updates]
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 5)
-    .map(({ date, source, title, url }) =>
-      `- ${date} · **${escapeMarkdown(source)}** · [${escapeMarkdown(title)}](<${new URL(url).href}>)`)
-    .join('\n');
-}
-
 async function writeChanged(path, content) {
   let previous;
   try {
@@ -303,7 +264,6 @@ export async function updateReadme({
   config,
   graphql,
   pinnedGraphql,
-  feedFetch = fetch,
   now = () => new Date(),
 } = {}) {
   if (!/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(username)) {
@@ -332,7 +292,6 @@ export async function updateReadme({
   const pinned = config.featuredSource === 'pinned'
     ? await fetchPinnedRepositories(username, token, pinnedGraphql)
     : null;
-  const articles = await fetchArticles(config.rssFeeds, feedFetch);
   const sections = {
     PROFILE: renderProfile(user, repositories),
     REPOSITORIES: renderRepositories(repositories),
@@ -341,8 +300,6 @@ export async function updateReadme({
       : renderPinnedRepositories(pinned),
     RECENT: renderRecent(repositories),
     RELEASES: renderReleases(releases),
-    UPDATES: renderUpdates(config.updates),
-    BLOG: renderBlog(articles, config.rssFeeds.length > 0),
     CONTRIBUTIONS: calendar
       ? '![过去一年贡献蛇动画](./assets/snake.svg)'
       : '未配置 `GITHUB_TOKEN` 或 `CONTRIBUTIONS_TOKEN`，无法生成贡献蛇动画。工作流会使用自带 Token 自动生成；本地请通过环境变量提供 Token。',

@@ -99,29 +99,10 @@ API 可见性、时间范围和数据刷新延迟仍可能造成差异，配置 
 - `featuredRepositories`：仅在 `featuredSource` 为 `manual` 时使用的仓库名称数组。
   配置中的仓库必须是当前账号可读取的公开仓库；不存在时脚本报错。
   为兼容旧配置，未填写 `featuredSource` 时仍按手动名单展示。
-- `rssFeeds`：博客 RSS / Atom 的 HTTPS 地址数组，默认空数组。
-- `updates`：手动维护的动态列表，每项包含 `date`（`YYYY-MM-DD`）、`source`、
-  `title`、`url`（HTTPS）。更新配置并运行脚本后，README 会按日期倒序展示最新 5 条；
-  适合没有开放 API 或 RSS 的平台，不需要把平台 Cookie 或 Token 存入仓库。
 - `focus`、`workingOn`、`learning`：个人关注方向、正在做和正在学的文字。
 
 切换账号时请调整静态介绍；置顶模式自动读取新账号的置顶列表，
 手动模式需同步调整精选名单。
-动态列表可按以下格式维护：
-
-```json
-{
-  "updates": [
-    {
-      "date": "2026-10-13",
-      "source": "微博",
-      "title": "动态标题",
-      "url": "https://example.com/post"
-    }
-  ]
-}
-```
-
 不要把私人邮箱、令牌或其他秘密写入公开配置文件。
 
 可自由编辑 README 标记区域外的内容。以下标记必须各自唯一、起止顺序正确：
@@ -137,10 +118,6 @@ API 可见性、时间范围和数据刷新延迟仍可能造成差异，配置 
 <!-- RECENT:END -->
 <!-- RELEASES:START -->
 <!-- RELEASES:END -->
-<!-- UPDATES:START -->
-<!-- UPDATES:END -->
-<!-- BLOG:START -->
-<!-- BLOG:END -->
 <!-- CONTRIBUTIONS:START -->
 <!-- CONTRIBUTIONS:END -->
 <!-- COMMITS:START -->

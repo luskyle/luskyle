@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { XMLValidator } from 'fast-xml-parser';
 import {
   validateConfig, renderFeatured, renderRecent, renderReleases,
-  fetchCalendar, fetchContributionData, parseFeed, fetchArticles, renderBlog, renderUpdates, updateReadme, sectionNames,
+  fetchCalendar, fetchContributionData, parseFeed, fetchArticles, updateReadme, sectionNames,
   fetchPinnedRepositories, renderPinnedRepositories,
 } from '../scripts/update-readme.mjs';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../scripts/charts.mjs';
 
 const config = {
-  featuredRepositories: ['demo'], rssFeeds: [],
+  featuredRepositories: ['demo'],
   focus: 'Developer tools', workingOn: '', learning: '',
 };
 const repository = {
@@ -55,30 +55,11 @@ test('profile configuration validates arrays, safe repo names and HTTPS feeds', 
   assert.deepEqual(validateConfig(config), config);
   for (const invalid of [
     { featuredRepositories: null }, { featuredRepositories: ['../secret'] },
-    { rssFeeds: ['http://example.com/feed'] }, { rssFeeds: ['file:///etc/passwd'] },
     { learning: 42 },
     { featuredSource: 'unknown' },
-    { updates: [{ date: '2026-02-30', source: 'Blog', title: 'Post', url: 'https://example.com/post' }] },
-    { updates: [{ date: '2026-10-13', source: 'Blog', title: 'Post', url: 'http://example.com/post' }] },
-    { updates: [{ date: '2026-10-13', source: 'Blog', title: '', url: 'https://example.com/post' }] },
   ]) {
     assert.throws(() => validateConfig({ ...config, ...invalid }));
   }
-});
-
-test('manual updates are rendered safely, sorted by date and capped at five', () => {
-  const updates = Array.from({ length: 7 }, (_, index) => ({
-    date: `2026-10-${String(index + 7).padStart(2, '0')}`,
-    source: 'Blog <&>',
-    title: `Post ${index}`,
-    url: `https://example.com/${index}`,
-  }));
-  const output = renderUpdates(updates);
-  assert.equal(output.split('\n').length, 5);
-  assert.ok(output.indexOf('2026-10-13') < output.indexOf('2026-10-12'));
-  assert.match(output, /Blog &lt;&amp;&gt;/);
-  assert.doesNotMatch(output, /2026-10-07|2026-10-08/);
-  assert.match(renderUpdates([]), /profile\.config\.json/);
 });
 
 const pinnedNode = (overrides = {}) => ({
@@ -223,8 +204,6 @@ test('RSS errors, unsafe links and malformed XML are reported', async () => {
     async () => ({ ok: false, status: 500 })), /HTTP 500/);
   await assert.rejects(fetchArticles(['https://example.com/rss'],
     async () => ({ ok: true, text: async () => 'x'.repeat(2_000_001) })), /2 MB/);
-  assert.match(renderBlog([], false), /尚未配置/);
-  assert.match(renderBlog([], true), /暂无文章/);
 });
 
 test('articles merge across feeds, deduplicate, sort and cap at five', async () => {
@@ -235,7 +214,6 @@ test('articles merge across feeds, deduplicate, sort and cap at five', async () 
   assert.equal(articles.length, 5);
   assert.equal(articles[0].title, 'Post 6');
   assert.equal(new Set(articles.map((article) => article.link)).size, 5);
-  assert.match(renderBlog(articles, true), /2026-10-16.*Post 6/);
 });
 
 test('streaks include yesterday when today is empty and reset after a gap', () => {
@@ -339,6 +317,7 @@ test('full update writes every section and chart; repeated update is unchanged; 
     assert.match(result, /commits\.svg/);
     assert.match(result, /每周提交频率/);
     assert.doesNotMatch(result, /最近公开活动|公开活动数量|语言分布|最近 Pull Request|开源贡献/);
+    assert.doesNotMatch(result, /最近动态|最新文章|UPDATES:START|BLOG:START/);
     assert.doesNotMatch(result, /<details>|<summary>/);
     assert.match(result, /mailto:public%40example\.com/);
     assert.match(result, /https:\/\/example\.com/);
@@ -348,9 +327,6 @@ test('full update writes every section and chart; repeated update is unchanged; 
       readFile(join(directory, 'assets', name), 'utf8')));
     assert.equal(await updateReadme(options), false);
     await assert.rejects(updateReadme({ ...options, graphql: async () => ({ errors: [{ message: 'Failed' }] }) }), /Failed/);
-    await assert.rejects(updateReadme({ ...options, config: { ...config, rssFeeds: ['https://example.com/rss'] },
-      feedFetch: async () => ({ ok: false, status: 503 }),
-    }), /HTTP 503/);
     assert.equal(await readFile(readmePath, 'utf8'), result);
     assert.deepEqual(await Promise.all(assetNames.map((name) =>
       readFile(join(directory, 'assets', name), 'utf8'))), previousAssets);
