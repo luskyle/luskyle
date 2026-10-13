@@ -8,7 +8,7 @@ test('checked-in README images resolve to valid accessible local SVGs', async ()
   const root = new URL('../', import.meta.url);
   const readme = await readFile(new URL('README.md', root), 'utf8');
   const images = [...readme.matchAll(/!\[([^\]]+)\]\(\.\/assets\/([a-z-]+\.svg)\)/g)];
-  assert.ok(images.length >= 5);
+  assert.ok(images.length >= 4);
   for (const [, alt, name] of images) {
     assert.ok(alt.trim());
     const content = await readFile(new URL(`assets/${name}`, root), 'utf8');

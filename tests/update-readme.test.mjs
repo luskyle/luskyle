@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   escapeMarkdown, replaceSection, renderProfile, renderRepositories,
-  renderActivity, githubRequest, updateReadme,
+  githubRequest, updateReadme,
   sectionNames,
 } from '../scripts/update-readme.mjs';
 
@@ -55,50 +55,6 @@ test('featured repos exclude forks/archives, sort by stars and recency, and cap 
   assert.match(renderRepositories([]), /暂无|暂时没有/);
 });
 
-test('activities skip private/unsupported events and cap at five', () => {
-  const event = {
-    type: 'PushEvent', public: true, repo: { name: 'example/demo' },
-    payload: {}, created_at: '2026-10-12T00:00:00Z',
-  };
-  const output = renderActivity([
-    { ...event, public: false, repo: { name: 'private/secret' } },
-    { ...event, type: 'UnknownEvent' }, ...Array(8).fill(event),
-  ]);
-  assert.equal(output.split('\n').length, 5);
-  assert.doesNotMatch(output, /private|Unknown/);
-  assert.match(renderActivity([]), /暂无/);
-});
-
-test('supported activity types render links and escape ref/tag values', () => {
-  const base = { public: true, repo: { name: 'example/demo' }, created_at: '2026-10-12T00:00:00Z' };
-  const issue = { number: 1, html_url: 'https://github.com/example/demo/issues/1' };
-  const cases = [
-    ['PullRequestEvent', { action: 'opened', pull_request: issue }, 'Pull Request'],
-    ['IssuesEvent', { action: 'opened', issue }, 'Issue'],
-    ['IssueCommentEvent', { issue, comment: { html_url: `${issue.html_url}#issuecomment-1` } }, '评论'],
-    ['ReleaseEvent', { release: { tag_name: '<v1>', html_url: 'https://github.com/example/demo/releases/tag/v1' } }, '&lt;v1&gt;'],
-    ['WatchEvent', {}, 'Star'],
-    ['ForkEvent', {}, 'Fork'],
-    ['CreateEvent', { ref_type: 'branch', ref: 'feature' }, 'feature'],
-  ];
-  for (const [type, payload, expected] of cases) {
-    assert.ok(renderActivity([{ ...base, type, payload }]).includes(expected));
-  }
-});
-
-test('activities are sorted newest first without modifying the input', () => {
-  const base = { type: 'PushEvent', public: true, repo: { name: 'example/demo' }, payload: {} };
-  const events = [
-    { ...base, created_at: '2026-10-09T00:00:00Z' },
-    { ...base, created_at: '2026-10-12T00:00:00Z' },
-    { ...base, created_at: '2026-10-10T00:00:00Z' },
-  ];
-  const original = structuredClone(events);
-  assert.deepEqual(renderActivity(events).split('\n').map((line) => line.slice(2, 12)),
-    ['2026-10-12', '2026-10-10', '2026-10-09']);
-  assert.deepEqual(events, original);
-});
-
 test('API errors are explicit and tokens are optional', async () => {
   for (const token of [undefined, 'test-token']) {
     await githubRequest('/users/example', token, async (url, options) => {
@@ -121,23 +77,27 @@ test('end-to-end update paginates, preserves static text and is idempotent', asy
       paths.push(path);
       if (path === '/users/example') return { login: 'example', public_repos: 101, followers: 2, following: 3 };
       if (path.includes('/repos?')) return path.endsWith('page=1') ? Array(100).fill(repo()) : [repo()];
-      if (path.includes('/events/public?')) return [];
       if (path.includes('/releases?')) return [];
-      if (path.startsWith('/search/issues?')) return { items: [], incomplete_results: false };
       throw new Error(`Unexpected path: ${path}`);
     };
     const options = {
       username: 'example', readmePath, request, token: '',
-      config: { featuredRepositories: ['demo'], rssFeeds: [], technologyLabels: ['JavaScript'],
+      config: { featuredRepositories: ['demo'], rssFeeds: [],
         focus: 'Tools', workingOn: '', learning: '' },
+      now: () => new Date('2026-10-13T15:00:00.000Z'),
     };
     assert.equal(await updateReadme(options), true);
-    const updated = await readFile(readmePath, 'utf8');
+    let updated = await readFile(readmePath, 'utf8');
     assert.ok(updated.startsWith('静态介绍\n'));
     assert.ok(updated.endsWith('\n静态结尾\n'));
     assert.match(updated, /\| 101 \| 2 \| 3 \| 202 \|/);
+    assert.match(updated, /文档更新时间：2026-10-13（UTC）/);
+    assert.doesNotMatch(updated, /ACTIVITY|PULL_REQUESTS|最近公开活动|最近 Pull Request/);
     assert.ok(paths.some((path) => path.endsWith('page=2')));
     assert.equal(await updateReadme(options), false);
+    assert.equal(await updateReadme({ ...options, now: () => new Date('2026-10-14T00:00:00.000Z') }), true);
+    updated = await readFile(readmePath, 'utf8');
+    assert.match(updated, /文档更新时间：2026-10-14（UTC）/);
     await assert.rejects(updateReadme({ ...options, request: async () => { throw new Error('API unavailable'); } }), /API unavailable/);
     assert.equal(await readFile(readmePath, 'utf8'), updated);
     await writeFile(readmePath, 'no markers');

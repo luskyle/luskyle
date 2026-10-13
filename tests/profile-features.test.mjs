@@ -5,16 +5,16 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { XMLValidator } from 'fast-xml-parser';
 import {
-  validateConfig, renderFeatured, renderRecent, renderReleases, renderPullRequests,
-  fetchCalendar, parseFeed, fetchArticles, renderBlog, updateReadme, sectionNames,
+  validateConfig, renderFeatured, renderRecent, renderReleases,
+  fetchCalendar, fetchContributionData, parseFeed, fetchArticles, renderBlog, updateReadme, sectionNames,
   fetchPinnedRepositories, renderPinnedRepositories,
 } from '../scripts/update-readme.mjs';
 import {
-  escapeXml, renderBars, renderAssets, contributionStreaks, renderCalendar, renderBanner,
+  escapeXml, renderBars, renderAssets, contributionStreaks, renderSnake, renderWeeklyCommits, renderBanner,
 } from '../scripts/charts.mjs';
 
 const config = {
-  featuredRepositories: ['demo'], rssFeeds: [], technologyLabels: ['C / C++', 'Git'],
+  featuredRepositories: ['demo'], rssFeeds: [],
   focus: 'Developer tools', workingOn: '', learning: '',
 };
 const repository = {
@@ -39,7 +39,16 @@ const calendar = {
   ] }],
 };
 const graphql = async () => ({
-  data: { user: { contributionsCollection: { contributionCalendar: calendar } } },
+  data: { user: { contributionsCollection: {
+    contributionCalendar: calendar,
+    commitContributionsByRepository: [{
+      repository: { nameWithOwner: 'example/demo' },
+      contributions: { nodes: [
+        { occurredAt: '2026-10-06T00:00:00Z', commitCount: 2 },
+        { occurredAt: '2026-09-06T00:00:00Z', commitCount: 3 },
+      ] },
+    }],
+  } } },
 });
 
 test('profile configuration validates arrays, safe repo names and HTTPS feeds', () => {
@@ -47,7 +56,7 @@ test('profile configuration validates arrays, safe repo names and HTTPS feeds', 
   for (const invalid of [
     { featuredRepositories: null }, { featuredRepositories: ['../secret'] },
     { rssFeeds: ['http://example.com/feed'] }, { rssFeeds: ['file:///etc/passwd'] },
-    { technologyLabels: Array(7).fill('JS') }, { learning: 42 },
+    { learning: 42 },
     { featuredSource: 'unknown' },
   ]) {
     assert.throws(() => validateConfig({ ...config, ...invalid }));
@@ -140,15 +149,6 @@ test('release list excludes drafts and prereleases, sorts and caps at five', () 
   assert.match(renderReleases([]), /暂无/);
 });
 
-test('PRs use qualified repository links and distinguish merged, closed and open', () => {
-  const pr = { html_url: 'https://github.com/other/project/pull/42', number: 42,
-    title: '<fix> | test', state: 'closed', pull_request: { merged_at: '2026-10-10' } };
-  assert.match(renderPullRequests([pr]), /\[other\/project#42\].*已合并/);
-  assert.match(renderPullRequests([{ ...pr, pull_request: {} }]), /已关闭/);
-  assert.match(renderPullRequests([{ ...pr, state: 'open', pull_request: {} }]), /进行中/);
-  assert.match(renderPullRequests([]), /暂未检索/);
-});
-
 test('contribution API never substitutes events for contributions or hides GraphQL errors', async () => {
   assert.equal(await fetchCalendar('example', '', () => { throw new Error('Must not request'); }), null);
   assert.deepEqual(await fetchCalendar('example', 'fixture-token', async (body) => {
@@ -162,8 +162,20 @@ test('contribution API never substitutes events for contributions or hides Graph
   await assert.rejects(fetchCalendar('example', 'fixture-token', async () => ({
     data: { user: { contributionsCollection: {
       contributionCalendar: { ...calendar, totalContributions: 557 },
+      commitContributionsByRepository: [],
     } } },
   })), /与每日合计 9 不一致/);
+  const stats = await fetchContributionData('example', 'fixture-token', async (body) => {
+    assert.match(body.query, /commitContributionsByRepository\(maxRepositories: 100\)/);
+    return graphql();
+  });
+  assert.equal(stats.commits[0].commitCount, 2);
+  await assert.rejects(fetchContributionData('example', 'fixture-token', async () => ({
+    data: { user: { contributionsCollection: {
+      contributionCalendar: calendar,
+      commitContributionsByRepository: [{ contributions: { nodes: [{ occurredAt: 'invalid', commitCount: -1 }] } }],
+    } } },
+  })), /无效的提交贡献记录/);
 });
 
 test('RSS and Atom parse single/multiple entries with dates and alternate links', () => {
@@ -219,9 +231,13 @@ test('streaks include yesterday when today is empty and reset after a gap', () =
   assert.equal(contributionStreaks(copy).current, 0);
 });
 
-test('all generated SVGs are valid, escaped and accessible, with bounded bars and animation', () => {
-  const assets = renderAssets(user, [repository], [], calendar, config);
-  assert.equal(Object.keys(assets).length, 7);
+test('generated SVGs include a dated contribution snake and weekly commit chart', () => {
+  const stats = { commits: [
+    { occurredAt: '2026-10-04T00:00:00Z', commitCount: 2 },
+    { occurredAt: '2026-10-06T00:00:00Z', commitCount: 3 },
+  ] };
+  const assets = renderAssets(user, [repository], calendar, stats.commits);
+  assert.equal(Object.keys(assets).length, 4);
   for (const [name, content] of Object.entries(assets)) {
     assert.equal(XMLValidator.validate(content), true, name);
     assert.match(content, /<title id="title">/);
@@ -229,31 +245,48 @@ test('all generated SVGs are valid, escaped and accessible, with bounded bars an
     assert.doesNotMatch(content, /<script|<foreignObject|<image|<iframe/);
     assert.ok(!content.includes('Example <&>'));
   }
-  assert.match(assets['banner.svg'], /clipPath id="typing"/);
   assert.match(assets['snake.svg'], /animateMotion/);
-  assert.match(assets['languages.svg'], /C\+\+: 1/);
-  assert.match(assets['activity.svg'], /No|Days 1–7: 0/);
+  assert.match(assets['snake.svg'], /2026-10-05 — 2026-10-11/);
+  assert.match(assets['commits.svg'], /Weekly Commit Frequency/);
+  assert.match(assets['commits.svg'], /2026-10-05 — 2026-10-11/);
+  assert.match(assets['commits.svg'], /Week of 2026-10-04: 5 commits/);
+  assert.equal(XMLValidator.validate(assets['commits.svg']), true);
+  assert.match(assets['snake.svg'], /animateMotion/);
+  const luskyleBanner = renderBanner({ login: 'luskyle', name: 'Luskyle' });
+  assert.match(luskyleBanner, />Luskyle<\/text>/);
+  assert.doesNotMatch(luskyleBanner, /Developer tools|Browser extensions|>LK<\/text>/);
+  assert.match(luskyleBanner, /Ten thousand miles of layered clouds\.<\/text><text x="40" y="180".*A thousand peaks wear snow at dusk\./);
+  assert.match(luskyleBanner, /OPEN SOURCE/);
+  assert.match(luskyleBanner, /SYSTEMS ENGINEERING/);
+  assert.match(luskyleBanner, /AUTOMATION/);
+  assert.match(luskyleBanner, /BUILT TO LAST/);
   assert.match(renderBars('Empty', '', []), /No public data/);
   assert.match(renderBars('Zero', '', [['zero', 0]]), /width="0"/);
   assert.doesNotMatch(renderBars('Huge', '', [['huge', 1_000_000]]), /NaN|Infinity/);
   assert.equal(escapeXml('<"&\'>'), '&lt;&quot;&amp;&apos;&gt;');
-  assert.doesNotMatch(renderCalendar({ totalContributions: 0, weeks: [] }, true), /animateMotion/);
+  assert.doesNotMatch(renderSnake({ totalContributions: 0, weeks: [] }), /animateMotion/);
 });
 
-test('language graph counts original primary-language repos, not stars or forks', () => {
-  const assets = renderAssets(user, [
-    repository, { ...repository, language: 'Python', stargazers_count: 999 },
-    { ...repository, language: 'Python', fork: true }, { ...repository, language: null },
-  ], [], null, config);
-  assert.match(assets['languages.svg'], /C\+\+: 1; Python: 1/);
-  assert.equal(Object.keys(assets).length, 5);
+test('weekly commit chart includes empty weeks and covers the calendar date range', () => {
+  const output = renderWeeklyCommits([
+    { occurredAt: '2025-11-02T00:00:00Z', commitCount: 0 },
+    { occurredAt: '2026-10-11T00:00:00Z', commitCount: 5 },
+  ], { weeks: [{ contributionDays: [
+    { date: '2025-11-02', contributionCount: 0 },
+    { date: '2026-10-11', contributionCount: 0 },
+  ] }] });
+  assert.equal(XMLValidator.validate(output), true);
+  assert.match(output, /Week of 2026-10-11: 5 commits/);
+  assert.match(output, /Week of 2025-11-02: 0 commits/);
+  assert.match(output, /2025-11-02 — 2026-10-11/);
+  assert.match(output, /r="2\.5"/);
 });
 
 test('redesigned banner uses a circuit monogram, escapes names and fits longer names', () => {
   const banner = renderBanner({ login: 'luskyle', name: 'Luskyle' });
   assert.equal(XMLValidator.validate(banner), true);
   assert.match(banner, /viewBox="0 0 960 280"/);
-  assert.match(banner, />LK<\/text>/);
+  assert.match(banner, />Luskyle<\/text>/);
   assert.match(banner, /id="grid"/);
   assert.match(banner, /id="typing"/);
   assert.doesNotMatch(banner, /cx="870"|<image|<script/);
@@ -275,9 +308,7 @@ test('full update writes every section and chart; repeated update is unchanged; 
     const request = async (path) => {
       if (path === '/users/example') return user;
       if (path.includes('/repos?')) return [repository];
-      if (path.includes('/events/public?')) return [];
       if (path.includes('/releases?')) return [];
-      if (path.startsWith('/search/issues?')) return { items: [], incomplete_results: false };
       throw new Error(`Unexpected request ${path}`);
     };
     const options = { username: 'example', token: 'fixture-token', readmePath, config, request, graphql };
@@ -286,21 +317,19 @@ test('full update writes every section and chart; repeated update is unchanged; 
     assert.ok(result.startsWith('STATIC INTRO\n'));
     assert.ok(result.endsWith('\nSTATIC END\n'));
     assert.doesNotMatch(result, /\nold\n/);
-    assert.match(result, /contributions\.svg/);
-    assert.match(result, /查询 Token 可见的 \*\*9\*\* 次贡献/);
-    assert.match(result, /### 🐍 贡献蛇动画/);
+    assert.match(result, /snake\.svg/);
+    assert.match(result, /commits\.svg/);
+    assert.match(result, /每周提交频率/);
+    assert.doesNotMatch(result, /最近公开活动|公开活动数量|语言分布|最近 Pull Request|开源贡献/);
     assert.doesNotMatch(result, /<details>|<summary>/);
     assert.match(result, /mailto:public%40example\.com/);
     assert.match(result, /https:\/\/example\.com/);
     const assetNames = await readdir(join(directory, 'assets'));
-    assert.equal(assetNames.length, 7);
+    assert.equal(assetNames.length, 4);
     const previousAssets = await Promise.all(assetNames.map((name) =>
       readFile(join(directory, 'assets', name), 'utf8')));
     assert.equal(await updateReadme(options), false);
     await assert.rejects(updateReadme({ ...options, graphql: async () => ({ errors: [{ message: 'Failed' }] }) }), /Failed/);
-    await assert.rejects(updateReadme({ ...options,
-      request: async (path) => path.startsWith('/search') ? { incomplete_results: true } : request(path),
-    }), /不完整/);
     await assert.rejects(updateReadme({ ...options, config: { ...config, rssFeeds: ['https://example.com/rss'] },
       feedFetch: async () => ({ ok: false, status: 503 }),
     }), /HTTP 503/);

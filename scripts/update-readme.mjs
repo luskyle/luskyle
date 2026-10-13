@@ -2,13 +2,13 @@ import { readFile, writeFile, rename, rm, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname, join } from 'node:path';
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
-import { renderAssets, contributionStreaks } from './charts.mjs';
+import { renderAssets } from './charts.mjs';
 
 const defaultReadme = fileURLToPath(new URL('../README.md', import.meta.url));
 const defaultConfig = fileURLToPath(new URL('../profile.config.json', import.meta.url));
 export const sectionNames = [
-  'PROFILE', 'REPOSITORIES', 'ACTIVITY', 'FEATURED', 'RECENT', 'RELEASES',
-  'PULL_REQUESTS', 'BLOG', 'CONTRIBUTIONS', 'ABOUT', 'CONTACT',
+  'PROFILE', 'REPOSITORIES', 'FEATURED', 'RECENT', 'RELEASES',
+  'BLOG', 'CONTRIBUTIONS', 'COMMITS', 'ABOUT', 'CONTACT', 'DOCUMENT_UPDATED',
 ];
 
 export function escapeMarkdown(value) {
@@ -61,44 +61,6 @@ export function renderRepositories(repositories, limit = 6) {
   ].join('\n');
 }
 
-function describeEvent(event) {
-  const repo = `[${escapeMarkdown(event.repo.name)}](https://github.com/${event.repo.name})`;
-  const payload = event.payload;
-  switch (event.type) {
-    case 'PushEvent':
-      return `推送代码到 ${repo}`;
-    case 'PullRequestEvent':
-      return `${escapeMarkdown(payload.action)} Pull Request [#${payload.pull_request.number}](${payload.pull_request.html_url}) · ${repo}`;
-    case 'IssuesEvent':
-      return `${escapeMarkdown(payload.action)} Issue [#${payload.issue.number}](${payload.issue.html_url}) · ${repo}`;
-    case 'IssueCommentEvent':
-      return `评论 [#${payload.issue.number}](${payload.comment.html_url}) · ${repo}`;
-    case 'ReleaseEvent':
-      return `发布 [${escapeMarkdown(payload.release.tag_name)}](${payload.release.html_url}) · ${repo}`;
-    case 'WatchEvent':
-      return `Star ${repo}`;
-    case 'ForkEvent':
-      return `Fork ${repo}`;
-    case 'CreateEvent':
-      return `创建 ${escapeMarkdown(payload.ref_type)}${payload.ref ? ` \`${escapeMarkdown(payload.ref)}\`` : ''} · ${repo}`;
-    default:
-      return null;
-  }
-}
-
-export function renderActivity(events, limit = 5) {
-  const entries = events
-    .filter((event) => event.public === true)
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .map((event) => {
-      const description = describeEvent(event);
-      return description ? `- ${event.created_at.slice(0, 10)} · ${description}` : null;
-    })
-    .filter((entry) => entry !== null)
-    .slice(0, limit);
-  return entries.length ? entries.join('\n') : '近期暂无可展示的公开活动。';
-}
-
 export async function githubRequest(path, token, fetchImpl = fetch, body) {
   const headers = {
     Accept: 'application/vnd.github+json',
@@ -121,12 +83,11 @@ export function validateConfig(config) {
   if (config.featuredSource !== undefined && !['manual', 'pinned'].includes(config.featuredSource)) {
     throw new Error('featuredSource 必须是 manual 或 pinned。');
   }
-  for (const key of ['featuredRepositories', 'rssFeeds', 'technologyLabels']) {
+  for (const key of ['featuredRepositories', 'rssFeeds']) {
     if (!Array.isArray(config[key]) || !config[key].every((value) => typeof value === 'string')) {
       throw new Error(`配置 ${key} 必须是字符串数组。`);
     }
   }
-  if (config.technologyLabels.length > 6) throw new Error('技术栈图最多支持 6 个标签。');
   if (!config.featuredRepositories.every((name) => /^[a-z\d_.-]+$/i.test(name))) {
     throw new Error('精选仓库名称无效。');
   }
@@ -201,29 +162,45 @@ export function renderReleases(releases) {
     : '公开原创仓库暂无正式 Release。';
 }
 
-export function renderPullRequests(items) {
-  return items.length ? items.slice(0, 5).map((pr) => {
-    const repository = new URL(pr.html_url).pathname.split('/').slice(1, 3).join('/');
-    const status = pr.pull_request?.merged_at ? '已合并' : pr.state === 'closed' ? '已关闭' : '进行中';
-    return `- [${escapeMarkdown(repository)}#${pr.number}](${pr.html_url}) · ${escapeMarkdown(pr.title)} · **${status}**`;
-  }).join('\n') : '暂未检索到公开 Pull Request；此区域展示本人及其他仓库中的公开贡献。';
-}
-
-export async function fetchCalendar(username, token, graphql = (body) => githubRequest('/graphql', token, fetch, body)) {
+export async function fetchContributionData(username, token, graphql = (body) => githubRequest('/graphql', token, fetch, body)) {
   if (!token) return null;
   const data = await graphql({
-    query: 'query($login: String!) { user(login: $login) { contributionsCollection { restrictedContributionsCount contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } } } } }',
+    query: 'query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } } commitContributionsByRepository(maxRepositories: 100) { repository { nameWithOwner } contributions(first: 100) { nodes { occurredAt commitCount } } } } } }',
     variables: { login: username },
   });
   if (data.errors?.length) throw new Error(`贡献数据请求失败：${data.errors.map((error) => error.message).join('; ')}`);
-  const calendar = data.data?.user?.contributionsCollection?.contributionCalendar;
+  const collection = data.data?.user?.contributionsCollection;
+  const calendar = collection?.contributionCalendar;
   if (!calendar) throw new Error('GitHub GraphQL 未返回贡献日历。');
   const dailyTotal = calendar.weeks.flatMap((week) => week.contributionDays)
     .reduce((sum, day) => sum + day.contributionCount, 0);
   if (dailyTotal !== calendar.totalContributions) {
     throw new Error(`贡献日历总数 ${calendar.totalContributions} 与每日合计 ${dailyTotal} 不一致。`);
   }
-  return calendar;
+  const repositories = collection.commitContributionsByRepository;
+  if (!Array.isArray(repositories)) throw new Error('GitHub GraphQL 未返回每周提交统计。');
+  const commits = repositories.flatMap((repository) => {
+    if (!Array.isArray(repository.contributions?.nodes)) {
+      throw new Error('GitHub GraphQL 返回了无效的提交贡献记录。');
+    }
+    return repository.contributions.nodes;
+  });
+  for (const contribution of commits) {
+    if (
+      typeof contribution.occurredAt !== 'string' ||
+      !Number.isFinite(Date.parse(contribution.occurredAt)) ||
+      !Number.isInteger(contribution.commitCount) ||
+      contribution.commitCount < 0
+    ) {
+      throw new Error('GitHub GraphQL 返回了无效的提交贡献记录。');
+    }
+  }
+  return { calendar, commits };
+}
+
+export async function fetchCalendar(username, token, graphql) {
+  const data = await fetchContributionData(username, token, graphql);
+  return data?.calendar ?? null;
 }
 
 export function parseFeed(xml) {
@@ -300,6 +277,7 @@ export async function updateReadme({
   graphql,
   pinnedGraphql,
   feedFetch = fetch,
+  now = () => new Date(),
 } = {}) {
   if (!/^[a-z\d](?:[a-z\d-]{0,37}[a-z\d])?$/i.test(username)) {
     throw new Error('PROFILE_USERNAME 不是有效的 GitHub 用户名。');
@@ -317,42 +295,41 @@ export async function updateReadme({
     repositories.push(...batch);
     if (batch.length < 100) break;
   }
-  const events = await request(`/users/${username}/events/public?per_page=100`);
   const releases = [];
   for (const repo of repositories.filter((item) => !item.fork)) {
     const batch = await request(`/repos/${username}/${encodeURIComponent(repo.name)}/releases?per_page=5`);
     releases.push(...batch.map((release) => ({ ...release, repository: repo.name })));
   }
-  const pullRequests = await request(`/search/issues?q=${encodeURIComponent(`is:pr author:${username} is:public`)}&sort=updated&order=desc&per_page=5`);
-  if (pullRequests.incomplete_results) throw new Error('GitHub PR 搜索返回不完整结果，请稍后重试。');
-  const calendar = await fetchCalendar(username, contributionsToken, graphql);
+  const contributionData = await fetchContributionData(username, contributionsToken, graphql);
+  const calendar = contributionData?.calendar ?? null;
   const pinned = config.featuredSource === 'pinned'
     ? await fetchPinnedRepositories(username, token, pinnedGraphql)
     : null;
   const articles = await fetchArticles(config.rssFeeds, feedFetch);
-  const streaks = calendar ? contributionStreaks(calendar) : null;
   const sections = {
     PROFILE: renderProfile(user, repositories),
     REPOSITORIES: renderRepositories(repositories),
-    ACTIVITY: renderActivity(events),
     FEATURED: pinned === null
       ? renderFeatured(repositories, config.featuredRepositories)
       : renderPinnedRepositories(pinned),
     RECENT: renderRecent(repositories),
     RELEASES: renderReleases(releases),
-    PULL_REQUESTS: renderPullRequests(pullRequests.items),
     BLOG: renderBlog(articles, config.rssFeeds.length > 0),
     CONTRIBUTIONS: calendar
-      ? `![过去一年贡献日历](./assets/contributions.svg)\n\n过去一年查询 Token 可见的 **${calendar.totalContributions}** 次贡献 · 当前连续 **${streaks.current}** 天 · 最长连续 **${streaks.longest}** 天（此日历范围内）。\n\n统计来自 GitHub GraphQL，每天贡献数与日历一致。私有贡献可见性取决于 Token 权限和个人资料设置，可能与本人登录后的主页总数不同；配置方法见[自动更新说明](./docs/automation.md#贡献数与个人主页不一致)。\n\n### 🐍 贡献蛇动画\n\n![沿近期活跃日期移动的装饰动画](./assets/snake.svg)\n\n动画沿近期活跃日期移动，不表示提交顺序；不支持 SVG 动画的客户端会显示静态日历。`
-      : '未配置 `GITHUB_TOKEN` 或 `CONTRIBUTIONS_TOKEN`，无法读取贡献日历及连续记录。工作流会使用自带 Token 自动生成；本地请通过环境变量提供 Token。',
+      ? '![过去一年贡献蛇动画](./assets/snake.svg)'
+      : '未配置 `GITHUB_TOKEN` 或 `CONTRIBUTIONS_TOKEN`，无法生成贡献蛇动画。工作流会使用自带 Token 自动生成；本地请通过环境变量提供 Token。',
+    COMMITS: calendar
+      ? '![过去一年每周提交频率折线图](./assets/commits.svg)'
+      : '未配置 `GITHUB_TOKEN` 或 `CONTRIBUTIONS_TOKEN`，无法生成每周提交频率图。',
     ABOUT: `- **关注方向：** ${escapeMarkdown(config.focus) || '待补充'}\n- **正在做：** ${escapeMarkdown(config.workingOn) || '维护下方列出的公开项目；具体计划待补充。'}\n- **正在学：** ${escapeMarkdown(config.learning) || '待补充（不根据仓库语言推断学习计划）。'}`,
     CONTACT: `[GitHub · ${escapeMarkdown(user.login)}](https://github.com/${user.login})` +
       (user.email ? ` · [公开邮箱](mailto:${encodeURIComponent(user.email)})` : '') +
       (user.blog && /^https?:\/\//i.test(user.blog) ? ` · [个人网站](<${new URL(user.blog).href}>)` : ''),
+    DOCUMENT_UPDATED: `文档更新时间：${now().toISOString().slice(0, 10)}（UTC）`,
   };
   let updated = readme;
   for (const [name, content] of Object.entries(sections)) updated = replaceSection(updated, name, content);
-  const assets = renderAssets(user, repositories, events, calendar, config);
+  const assets = renderAssets(user, repositories, calendar, contributionData?.commits ?? []);
   const assetsPath = join(dirname(readmePath), 'assets');
   await mkdir(assetsPath, { recursive: true });
   let changed = false;

@@ -14,7 +14,8 @@
 
 工作流使用仓库自带的 `GITHUB_TOKEN`，只读取公开数据，不需要配置个人访问令牌。
 自动提交只包含根目录的 `README.md` 和 `assets/` 中的生成图片；
-相同数据不会产生新提交。全部图片由本地 SVG 生成器绘制，不调用第三方统计图片服务。
+README 文档更新时间也会在每次成功更新时自动写入（UTC 日期）。相同数据且日期未变化时
+不会产生新提交。全部图片由本地 SVG 生成器绘制，不调用第三方统计图片服务。
 本地生成一次 README 不会启动云端定时任务，必须先将工作流推送到 GitHub。
 
 ## 展示内容
@@ -46,32 +47,31 @@
 
 | 文件 | 内容与统计口径 |
 | --- | --- |
-| `banner.svg` | 深色渐变与网格横幅、循环打字效果、电路芯片式 LK 标识（其他账号使用用户名前两个字母） |
-| `stack.svg` | 可配置的技术栈徽章，最多 6 个 |
+| `banner.svg` | 深色渐变与网格横幅、两行英文诗句，以及开源、系统工程、自动化与长期构建标签 |
 | `stats.svg` | 公开仓库数、关注数和公开原创仓库 Star 总数 |
-| `languages.svg` | 按原创仓库**主要语言数量**排名，最多 8 种语言；不是代码字节比例 |
-| `activity.svg` | Events API 样本，以最新事件为终点的 28 天，分为 4 组；不是完整提交统计 |
-| `contributions.svg` | GitHub GraphQL 默认过去一年的贡献日历 |
-| `snake.svg` | 贡献日历上的装饰蛇动画，沿最后 40 个活跃日期移动，不表示提交顺序 |
+| `commits.svg` | GitHub GraphQL 返回的过去一年默认分支提交数，按周汇总并绘制折线 |
+| `snake.svg` | 过去一年贡献记录的动画，标出覆盖日期范围，沿最后 40 个活跃日期移动 |
 
-连续记录按贡献日历中的连续非零日期计算；当前日期尚无贡献时，
-允许连续记录截至昨天。最长记录只计算本次日历范围，不是账号历史最长记录。
-图表包含 SVG 标题、描述，README 同时保留关键指标文字。
+连续记录按 GitHub 贡献数据中的连续非零日期计算；当前日期尚无贡献时，
+允许连续记录截至昨天。最长记录只计算本次数据范围，不是账号历史最长记录。
+图表包含 SVG 标题、描述，贡献蛇图中会显示日期范围。
 不支持 SVG 动画的客户端会显示静态图片。图表文字采用英文以减少字体兼容问题，
 README 中提供中文说明。
 
-贡献日历需要 `GITHUB_TOKEN`。工作流自动提供；本地未提供时明确提示无法生成
-贡献日历和连续记录，不用事件样本伪装贡献数据。配置 Token 后再运行即可生成。
-GraphQL、PR 搜索、Release、RSS 请求失败时都会报错，全部网络数据准备完成之前不写文件。
+贡献蛇动画和每周提交图需要 `GITHUB_TOKEN`。工作流自动提供；本地未提供时明确提示
+无法生成，不用公开活动样本伪装提交数据。每周提交数来自 GitHub 贡献图中的默认分支
+提交统计，不包括非默认分支，也不等同于 Issue、PR 等其他贡献类型。
+配置 Token 后再运行即可生成。
+GraphQL、Release、RSS 请求失败时都会报错，全部网络数据准备完成之前不写文件。
 
 ## 配置与标记
 
 ### 贡献数与个人主页不一致
 
-贡献图读取 GitHub GraphQL `contributionCalendar`，不使用 Events API 估算，
-也不把其他统计数字补进日历。README 和 SVG 总数采用同一份日历数据。
+贡献蛇读取 GitHub GraphQL `contributionCalendar`，不使用 Events API 估算，
+也不把其他统计数字补进日历。
 Token 能读取的范围可能与账号本人登录后看到的主页不同；默认仓库
-`GITHUB_TOKEN` 不能读取其他私有仓库。仅修改总数会导致热力图和连续记录失真。
+`GITHUB_TOKEN` 不能读取其他私有仓库。
 
 若希望包含私有贡献：
 
@@ -100,11 +100,10 @@ API 可见性、时间范围和数据刷新延迟仍可能造成差异，配置 
   配置中的仓库必须是当前账号可读取的公开仓库；不存在时脚本报错。
   为兼容旧配置，未填写 `featuredSource` 时仍按手动名单展示。
 - `rssFeeds`：博客 RSS / Atom 的 HTTPS 地址数组，默认空数组。
-- `technologyLabels`：最多 6 个技术栈标签。
 - `focus`、`workingOn`、`learning`：个人关注方向、正在做和正在学的文字。
 
-技术栈是展示标签，不自动推断熟练度。切换账号时请调整静态介绍；
-置顶模式自动读取新账号的置顶列表，手动模式需同步调整精选名单。
+切换账号时请调整静态介绍；置顶模式自动读取新账号的置顶列表，
+手动模式需同步调整精选名单。
 不要把私人邮箱、令牌或其他秘密写入公开配置文件。
 
 可自由编辑 README 标记区域外的内容。以下标记必须各自唯一、起止顺序正确：
@@ -114,24 +113,24 @@ API 可见性、时间范围和数据刷新延迟仍可能造成差异，配置 
 <!-- PROFILE:END -->
 <!-- REPOSITORIES:START -->
 <!-- REPOSITORIES:END -->
-<!-- ACTIVITY:START -->
-<!-- ACTIVITY:END -->
 <!-- FEATURED:START -->
 <!-- FEATURED:END -->
 <!-- RECENT:START -->
 <!-- RECENT:END -->
 <!-- RELEASES:START -->
 <!-- RELEASES:END -->
-<!-- PULL_REQUESTS:START -->
-<!-- PULL_REQUESTS:END -->
 <!-- BLOG:START -->
 <!-- BLOG:END -->
 <!-- CONTRIBUTIONS:START -->
 <!-- CONTRIBUTIONS:END -->
+<!-- COMMITS:START -->
+<!-- COMMITS:END -->
 <!-- ABOUT:START -->
 <!-- ABOUT:END -->
 <!-- CONTACT:START -->
 <!-- CONTACT:END -->
+<!-- DOCUMENT_UPDATED:START -->
+<!-- DOCUMENT_UPDATED:END -->
 ```
 
 区域内手动写入的内容会在下一次更新时被替换。API 请求失败或标记错误时，
@@ -160,6 +159,6 @@ npm test
 PROFILE_USERNAME=luskyle npm run update
 ```
 
-可通过环境变量 `GITHUB_TOKEN` 提高本地 GitHub API 限额并启用贡献日历。
+可通过环境变量 `GITHUB_TOKEN` 提高本地 GitHub API 限额并启用贡献图表。
 不要把 Token 写入代码或提交到仓库。未提供 Token 时使用匿名公开 API，
 受到较低的请求限额约束。只有全部请求成功后才会写入 README。

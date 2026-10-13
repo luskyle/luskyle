@@ -8,13 +8,9 @@
 
 [个人主页](https://github.com/luskyle) · [所有仓库](https://github.com/luskyle?tab=repositories) · [精选项目](#-精选项目) · [统计图表](#-github-统计图表)
 
+<!-- ABOUT:START -->
+
 <!-- ABOUT:END -->
-
-## 🛠️ 技术栈与工具
-
-![技术栈与工具徽章](./assets/stack.svg)
-
-这里展示公开项目涉及的语言和本仓库使用的工具，不代表熟练度评级。
 
 ## 🌟 精选项目
 
@@ -85,16 +81,6 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 
 <!-- RELEASES:END -->
 
-## 🤝 开源贡献 · 最近 Pull Request
-
-<!-- PULL_REQUESTS:START -->
-
-- [aalhour/C-Sharp-Algorithms#105](https://github.com/aalhour/C-Sharp-Algorithms/pull/105) · Create README-zh.md · **已关闭**
-- [luskyle/Solutions#1](https://github.com/luskyle/Solutions/pull/1) · New Merge OR Delete · **已合并**
-- [luskyle/PrimitiveGenerationSystem#1](https://github.com/luskyle/PrimitiveGenerationSystem/pull/1) · Create LICENSE · **已合并**
-
-<!-- PULL_REQUESTS:END -->
-
 ## 📚 最新文章
 
 <!-- BLOG:START -->
@@ -115,30 +101,18 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 
 <!-- PROFILE:END -->
 
-![公开原创仓库的主要语言分布](./assets/languages.svg)
+### 📈 每周提交频率
 
-语言图按**仓库主要语言的数量**统计，不表示代码行数、代码体积或个人熟练度。
+<!-- COMMITS:START -->
+![过去一年每周提交频率折线图](./assets/commits.svg)
 
-![公开活动数量条形图](./assets/activity.svg)
+<!-- COMMITS:END -->
 
-活动图统计 Events API 样本中以最新事件日期为终点的 28 天，按周分组；
-不是提交数量或完整贡献历史。
-
-## 🟩 贡献日历与连续记录
+## 🐍 贡献蛇动画
 
 <!-- CONTRIBUTIONS:START -->
 
-![过去一年贡献日历](./assets/contributions.svg)
-
-过去一年查询 Token 可见的 **446** 次贡献 · 当前连续 **1** 天 · 最长连续 **4** 天（此日历范围内）。
-
-统计来自 GitHub GraphQL，每天贡献数与日历一致。私有贡献可见性取决于 Token 权限和个人资料设置，可能与本人登录后的主页总数不同。
-
-### 🐍 贡献蛇动画
-
-![沿近期活跃日期移动的装饰动画](./assets/snake.svg)
-
-动画沿近期活跃日期移动，不表示提交顺序；不支持 SVG 动画的客户端会显示静态日历。
+![过去一年贡献蛇动画](./assets/snake.svg)
 
 <!-- CONTRIBUTIONS:END -->
 
@@ -157,18 +131,6 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 
 <!-- REPOSITORIES:END -->
 
-## 📝 最近公开活动
-
-<!-- ACTIVITY:START -->
-
-- 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
-- 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
-- 2026-10-12 · 推送代码到 [luskyle/luskyle](https://github.com/luskyle/luskyle)
-- 2026-10-12 · 创建 branch `main` · [luskyle/luskyle](https://github.com/luskyle/luskyle)
-- 2026-10-10 · 推送代码到 [luskyle/pupu](https://github.com/luskyle/pupu)
-
-<!-- ACTIVITY:END -->
-
 ## 📬 联系我
 
 <!-- CONTACT:START -->
@@ -180,5 +142,11 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 ---
 
 文字与统计图每 6 小时自动刷新，也支持手动更新。图片由本仓库生成，无第三方统计图片服务。
-动态区域外的文字可以自由编辑；个人方向、技术标签和 RSS 可通过配置文件调整。
+动态区域外的文字可以自由编辑；个人方向和 RSS 可通过配置文件调整。
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
+
+<!-- DOCUMENT_UPDATED:START -->
+
+文档更新时间：2026-10-13（UTC）
+
+<!-- DOCUMENT_UPDATED:END -->
