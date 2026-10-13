@@ -77,6 +77,14 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 - 2026-09-29 · **moz** · [vscode-dxf-viewer-v0.2.3](https://github.com/luskyle/moz/releases/tag/vscode-dxf-viewer-v0.2.3)
 <!-- RELEASES:END -->
 
+## 🗞️ 最近动态
+
+<!-- UPDATES:START -->
+
+暂无手动维护的动态。可在 `profile.config.json` 的 `updates` 中添加内容。
+
+<!-- UPDATES:END -->
+
 ## 📚 最新文章
 
 <!-- BLOG:START -->
@@ -127,7 +135,7 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 ---
 
 文字与统计图每 6 小时自动刷新，也支持手动更新。图片由本仓库生成，无第三方统计图片服务。
-动态区域外的文字可以自由编辑；个人方向和 RSS 可通过配置文件调整。
+动态区域外的文字可以自由编辑；个人方向、手动动态和 RSS 可通过配置文件调整。
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->

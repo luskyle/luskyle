@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { XMLValidator } from 'fast-xml-parser';
 import {
   validateConfig, renderFeatured, renderRecent, renderReleases,
-  fetchCalendar, fetchContributionData, parseFeed, fetchArticles, renderBlog, updateReadme, sectionNames,
+  fetchCalendar, fetchContributionData, parseFeed, fetchArticles, renderBlog, renderUpdates, updateReadme, sectionNames,
   fetchPinnedRepositories, renderPinnedRepositories,
 } from '../scripts/update-readme.mjs';
 import {
@@ -58,9 +58,27 @@ test('profile configuration validates arrays, safe repo names and HTTPS feeds', 
     { rssFeeds: ['http://example.com/feed'] }, { rssFeeds: ['file:///etc/passwd'] },
     { learning: 42 },
     { featuredSource: 'unknown' },
+    { updates: [{ date: '2026-02-30', source: 'Blog', title: 'Post', url: 'https://example.com/post' }] },
+    { updates: [{ date: '2026-10-13', source: 'Blog', title: 'Post', url: 'http://example.com/post' }] },
+    { updates: [{ date: '2026-10-13', source: 'Blog', title: '', url: 'https://example.com/post' }] },
   ]) {
     assert.throws(() => validateConfig({ ...config, ...invalid }));
   }
+});
+
+test('manual updates are rendered safely, sorted by date and capped at five', () => {
+  const updates = Array.from({ length: 7 }, (_, index) => ({
+    date: `2026-10-${String(index + 7).padStart(2, '0')}`,
+    source: 'Blog <&>',
+    title: `Post ${index}`,
+    url: `https://example.com/${index}`,
+  }));
+  const output = renderUpdates(updates);
+  assert.equal(output.split('\n').length, 5);
+  assert.ok(output.indexOf('2026-10-13') < output.indexOf('2026-10-12'));
+  assert.match(output, /Blog &lt;&amp;&gt;/);
+  assert.doesNotMatch(output, /2026-10-07|2026-10-08/);
+  assert.match(renderUpdates([]), /profile\.config\.json/);
 });
 
 const pinnedNode = (overrides = {}) => ({
