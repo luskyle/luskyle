@@ -61,7 +61,7 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 <!-- RECENT:START -->
 - **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-10-13
   暂未填写仓库简介。
-- **[litedroid](https://github.com/luskyle/litedroid)** · 最近推送 2026-10-12
+- **[litedroid](https://github.com/luskyle/litedroid)** · 最近推送 2026-10-13
   暂未填写仓库简介。
 - **[the-world](https://github.com/luskyle/the-world)** · 最近推送 2026-10-12
   认识这个世界
@@ -80,9 +80,7 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 ## 🗞️ 最近动态
 
 <!-- UPDATES:START -->
-
 暂无手动维护的动态。可在 `profile.config.json` 的 `updates` 中添加内容。
-
 <!-- UPDATES:END -->
 
 ## 📚 最新文章
