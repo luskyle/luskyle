@@ -25,12 +25,6 @@
 
 **C++** · ⭐ 0 · Forks 0
 
-### [luskyle/memcoach](https://github.com/luskyle/memcoach)
-
-Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记忆集 / 学习插件）
-
-**Dart** · ⭐ 0 · Forks 0
-
 ### [luskyle/pupu](https://github.com/luskyle/pupu)
 
 一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。
@@ -54,6 +48,12 @@ Memcoach 记忆教练 —— 间隔重复记忆训练（复习 / 记忆库 / 记
 暂未填写仓库简介。
 
 **C++** · ⭐ 0 · Forks 0
+
+### [luskyle/the-world](https://github.com/luskyle/the-world)
+
+认识这个世界
+
+**CSS** · ⭐ 0 · Forks 0
 <!-- FEATURED:END -->
 
 ## 🔨 最近维护
