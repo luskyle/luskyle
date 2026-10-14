@@ -59,10 +59,10 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
+- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-10-14
+  暂未填写仓库简介。
 - **[the-world](https://github.com/luskyle/the-world)** · 最近推送 2026-10-14
   认识这个世界
-- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-10-13
-  暂未填写仓库简介。
 - **[litedroid](https://github.com/luskyle/litedroid)** · 最近推送 2026-10-13
   暂未填写仓库简介。
 <!-- RECENT:END -->
@@ -105,8 +105,8 @@
 | 仓库 | 简介 | 语言 | Stars |
 | --- | --- | --- | ---: |
 | [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | — | 13 |
-| [the-world](https://github.com/luskyle/the-world) | 认识这个世界 | CSS | 0 |
 | [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
+| [the-world](https://github.com/luskyle/the-world) | 认识这个世界 | CSS | 0 |
 | [litedroid](https://github.com/luskyle/litedroid) | — | Shell | 0 |
 | [pupu](https://github.com/luskyle/pupu) | 一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。 | TypeScript | 0 |
 | [antelope](https://github.com/luskyle/antelope) | 小巧敏捷的 C/C++ 编译链接工具。用一份或多份 JSON 配置描述构建目标，把项目编成静态库、共享库或可执行程序；不生成 makefile，也不引入额外的构建语言。最重要的是，你可以与cmake说拜拜了 | Python | 0 |
