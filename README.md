@@ -59,12 +59,12 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
+- **[pupu](https://github.com/luskyle/pupu)** · 最近推送 2026-10-19
+  一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。
 - **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-10-18
   暂未填写仓库简介。
 - **[the-world](https://github.com/luskyle/the-world)** · 最近推送 2026-10-14
   认识这个世界
-- **[litedroid](https://github.com/luskyle/litedroid)** · 最近推送 2026-10-13
-  暂未填写仓库简介。
 <!-- RECENT:END -->
 
 ## 📦 最新发布
@@ -125,5 +125,5 @@
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-10-18（UTC）
+文档更新时间：2026-10-19（UTC）
 <!-- DOCUMENT_UPDATED:END -->
