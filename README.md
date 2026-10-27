@@ -125,5 +125,5 @@
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-10-26（UTC）
+文档更新时间：2026-10-27（UTC）
 <!-- DOCUMENT_UPDATED:END -->
