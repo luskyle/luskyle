@@ -59,9 +59,9 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
-- **[fake-lingxi](https://github.com/luskyle/fake-lingxi)** · 最近推送 2026-10-30
+- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-10-30
   暂未填写仓库简介。
-- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-10-29
+- **[fake-lingxi](https://github.com/luskyle/fake-lingxi)** · 最近推送 2026-10-30
   暂未填写仓库简介。
 - **[damn-clock-in](https://github.com/luskyle/damn-clock-in)** · 最近推送 2026-10-29
   暂未填写仓库简介。
@@ -105,8 +105,8 @@
 | 仓库 | 简介 | 语言 | Stars |
 | --- | --- | --- | ---: |
 | [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | — | 13 |
-| [fake-lingxi](https://github.com/luskyle/fake-lingxi) | — | — | 0 |
 | [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
+| [fake-lingxi](https://github.com/luskyle/fake-lingxi) | — | — | 0 |
 | [damn-clock-in](https://github.com/luskyle/damn-clock-in) | — | Kotlin | 0 |
 | [the-world](https://github.com/luskyle/the-world) | 认识这个世界 | CSS | 0 |
 | [litedroid](https://github.com/luskyle/litedroid) | — | Shell | 0 |
