@@ -59,12 +59,12 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
+- **[fake-lingxi](https://github.com/luskyle/fake-lingxi)** · 最近推送 2026-10-30
+  暂未填写仓库简介。
 - **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-10-29
   暂未填写仓库简介。
 - **[damn-clock-in](https://github.com/luskyle/damn-clock-in)** · 最近推送 2026-10-29
   暂未填写仓库简介。
-- **[pupu](https://github.com/luskyle/pupu)** · 最近推送 2026-10-19
-  一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。
 <!-- RECENT:END -->
 
 ## 📦 最新发布
@@ -84,7 +84,7 @@
 <!-- PROFILE:START -->
 | 公开仓库 | Followers | Following | 原创仓库 Stars |
 | ---: | ---: | ---: | ---: |
-| 40 | 10 | 4 | 31 |
+| 41 | 10 | 4 | 31 |
 <!-- PROFILE:END -->
 
 ### 📈 每周提交频率
@@ -105,11 +105,11 @@
 | 仓库 | 简介 | 语言 | Stars |
 | --- | --- | --- | ---: |
 | [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | — | 13 |
+| [fake-lingxi](https://github.com/luskyle/fake-lingxi) | — | — | 0 |
 | [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
 | [damn-clock-in](https://github.com/luskyle/damn-clock-in) | — | Kotlin | 0 |
 | [the-world](https://github.com/luskyle/the-world) | 认识这个世界 | CSS | 0 |
 | [litedroid](https://github.com/luskyle/litedroid) | — | Shell | 0 |
-| [pupu](https://github.com/luskyle/pupu) | 一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。 | TypeScript | 0 |
 <!-- REPOSITORIES:END -->
 
 ## 📬 联系我
@@ -125,5 +125,5 @@
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-10-29（UTC）
+文档更新时间：2026-10-30（UTC）
 <!-- DOCUMENT_UPDATED:END -->
