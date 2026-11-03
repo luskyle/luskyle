@@ -59,11 +59,11 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
+- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-02
+  暂未填写仓库简介。
 - **[damn-clock-in](https://github.com/luskyle/damn-clock-in)** · 最近推送 2026-11-02
   暂未填写仓库简介。
 - **[sing-japanese](https://github.com/luskyle/sing-japanese)** · 最近推送 2026-11-02
-  暂未填写仓库简介。
-- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-02
   暂未填写仓库简介。
 <!-- RECENT:END -->
 
@@ -106,9 +106,9 @@
 | --- | --- | --- | ---: |
 | [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | — | 13 |
 | [kicad-mcp](https://github.com/luskyle/kicad-mcp) | 这是一个带 kicad-mcp 的 KiCad 源码仓库：在标准 KiCad 之上，增加了 MCP（Model Context Protocol）能力 —— 让 AI 助手通过自然语言直接控制 KiCad 绘制/检查/仿真原理图与 PCB，实现"你说电路，AI 画图"。 | C++ | 1 |
+| [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
 | [damn-clock-in](https://github.com/luskyle/damn-clock-in) | — | Kotlin | 0 |
 | [sing-japanese](https://github.com/luskyle/sing-japanese) | — | TypeScript | 0 |
-| [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
 | [fake-lingxi](https://github.com/luskyle/fake-lingxi) | — | — | 0 |
 <!-- REPOSITORIES:END -->
 
@@ -125,5 +125,5 @@
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-11-02（UTC）
+文档更新时间：2026-11-03（UTC）
 <!-- DOCUMENT_UPDATED:END -->
