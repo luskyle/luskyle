@@ -19,35 +19,11 @@
 <!-- FEATURED:START -->
 跟随 GitHub 主页置顶仓库，按置顶顺序展示。
 
-### [luskyle/kicad-mcp](https://github.com/luskyle/kicad-mcp)
-
-这是一个带 kicad-mcp 的 KiCad 源码仓库：在标准 KiCad 之上，增加了 MCP（Model Context Protocol）能力 —— 让 AI 助手通过自然语言直接控制 KiCad 绘制/检查/仿真原理图与 PCB，实现"你说电路，AI 画图"。
-
-**C++** · ⭐ 1 · Forks 0
-
 ### [luskyle/pupu](https://github.com/luskyle/pupu)
 
 一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。
 
 **TypeScript** · ⭐ 0 · Forks 1
-
-### [luskyle/menuconfig-plusplus](https://github.com/luskyle/menuconfig-plusplus)
-
-从 linux kernel 源码中的 mconf 工具优化改造而来。用于图形化生成项目宏配置。
-
-**C** · ⭐ 0 · Forks 0
-
-### [luskyle/antelope](https://github.com/luskyle/antelope)
-
-小巧敏捷的 C/C++ 编译链接工具。用一份或多份 JSON 配置描述构建目标，把项目编成静态库、共享库或可执行程序；不生成 makefile，也不引入额外的构建语言。最重要的是，你可以与cmake说拜拜了
-
-**Python** · ⭐ 0 · Forks 0
-
-### [luskyle/moz](https://github.com/luskyle/moz)
-
-暂未填写仓库简介。
-
-**C++** · ⭐ 0 · Forks 0
 
 ### [luskyle/DAO](https://github.com/luskyle/DAO)
 
@@ -59,7 +35,7 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
-- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-10
+- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-11
   暂未填写仓库简介。
 - **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-10
   认识这个世界
