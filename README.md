@@ -35,12 +35,12 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
+- **[Solutions](https://github.com/luskyle/Solutions)** · 最近推送 2026-11-12
+  面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。
 - **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-11
   暂未填写仓库简介。
 - **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-10
   认识这个世界
-- **[pupu](https://github.com/luskyle/pupu)** · 最近推送 2026-11-09
-  一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。
 <!-- RECENT:END -->
 
 ## 📦 最新发布
@@ -80,7 +80,7 @@
 <!-- REPOSITORIES:START -->
 | 仓库 | 简介 | 语言 | Stars |
 | --- | --- | --- | ---: |
-| [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | — | 13 |
+| [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | JavaScript | 13 |
 | [kicad-mcp](https://github.com/luskyle/kicad-mcp) | 这是一个带 kicad-mcp 的 KiCad 源码仓库：在标准 KiCad 之上，增加了 MCP（Model Context Protocol）能力 —— 让 AI 助手通过自然语言直接控制 KiCad 绘制/检查/仿真原理图与 PCB，实现"你说电路，AI 画图"。 | C++ | 1 |
 | [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
 | [DAO](https://github.com/luskyle/DAO) | 认识这个世界 | CSS | 0 |
@@ -101,5 +101,5 @@
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-11-11（UTC）
+文档更新时间：2026-11-12（UTC）
 <!-- DOCUMENT_UPDATED:END -->
