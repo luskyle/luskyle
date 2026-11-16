@@ -35,10 +35,10 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
-- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-15
-  暂未填写仓库简介。
-- **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-14
+- **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-16
   天道常在
+- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-16
+  暂未填写仓库简介。
 - **[Solutions](https://github.com/luskyle/Solutions)** · 最近推送 2026-11-12
   面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。
 <!-- RECENT:END -->
