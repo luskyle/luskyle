@@ -37,7 +37,7 @@
 <!-- RECENT:START -->
 - **[sing-japanese](https://github.com/luskyle/sing-japanese)** · 最近推送 2026-11-17
   暂未填写仓库简介。
-- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-16
+- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-17
   暂未填写仓库简介。
 - **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-16
   天道常在
@@ -46,11 +46,11 @@
 ## 📦 最新发布
 
 <!-- RELEASES:START -->
+- 2026-11-17 · **sing-japanese** · [v0.3.1](https://github.com/luskyle/sing-japanese/releases/tag/v0.3.1)
+- 2026-11-17 · **sing-japanese** · [v0.3.0](https://github.com/luskyle/sing-japanese/releases/tag/v0.3.0)
 - 2026-11-06 · **pupu** · [v0.3.1](https://github.com/luskyle/pupu/releases/tag/v0.3.1)
 - 2026-10-10 · **pupu** · [v0.3.0](https://github.com/luskyle/pupu/releases/tag/v0.3.0)
 - 2026-10-09 · **antelope** · [v1.4](https://github.com/luskyle/antelope/releases/tag/v1.4)
-- 2026-10-08 · **antelope** · [v1.3](https://github.com/luskyle/antelope/releases/tag/v1.3)
-- 2026-09-29 · **moz** · [vscode-dxf-viewer-v0.2.4](https://github.com/luskyle/moz/releases/tag/vscode-dxf-viewer-v0.2.4)
 <!-- RELEASES:END -->
 
 ## 📊 GitHub 统计图表
@@ -82,10 +82,10 @@
 | --- | --- | --- | ---: |
 | [Solutions](https://github.com/luskyle/Solutions) | 面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。 | JavaScript | 13 |
 | [kicad-mcp](https://github.com/luskyle/kicad-mcp) | 这是一个带 kicad-mcp 的 KiCad 源码仓库：在标准 KiCad 之上，增加了 MCP（Model Context Protocol）能力 —— 让 AI 助手通过自然语言直接控制 KiCad 绘制/检查/仿真原理图与 PCB，实现"你说电路，AI 画图"。 | C++ | 1 |
+| [sing-japanese](https://github.com/luskyle/sing-japanese) | — | C++ | 0 |
 | [DAO](https://github.com/luskyle/DAO) | 天道常在 | CSS | 0 |
 | [luskyle](https://github.com/luskyle/luskyle) | — | JavaScript | 0 |
 | [pupu](https://github.com/luskyle/pupu) | 一款多平台内容发布浏览器扩展，一次编辑，轻松将内容同步发布到多个社交平台。 | TypeScript | 0 |
-| [sing-japanese](https://github.com/luskyle/sing-japanese) | — | C++ | 0 |
 <!-- REPOSITORIES:END -->
 
 ## 📬 联系我
