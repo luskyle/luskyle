@@ -35,12 +35,12 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
-- **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-16
-  天道常在
+- **[sing-japanese](https://github.com/luskyle/sing-japanese)** · 最近推送 2026-11-17
+  暂未填写仓库简介。
 - **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-16
   暂未填写仓库简介。
-- **[Solutions](https://github.com/luskyle/Solutions)** · 最近推送 2026-11-12
-  面向工控 / 上位机桌面软件开发的专题集与素材库（2017 年起积累）。
+- **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-16
+  天道常在
 <!-- RECENT:END -->
 
 ## 📦 最新发布
@@ -101,5 +101,5 @@
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-11-16（UTC）
+文档更新时间：2026-11-17（UTC）
 <!-- DOCUMENT_UPDATED:END -->
