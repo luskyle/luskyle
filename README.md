@@ -35,9 +35,9 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
-- **[sing-japanese](https://github.com/luskyle/sing-japanese)** · 最近推送 2026-11-18
+- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-18
   暂未填写仓库简介。
-- **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-17
+- **[sing-japanese](https://github.com/luskyle/sing-japanese)** · 最近推送 2026-11-18
   暂未填写仓库简介。
 - **[DAO](https://github.com/luskyle/DAO)** · 最近推送 2026-11-16
   天道常在
