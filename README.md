@@ -41,11 +41,11 @@
 ## 🔨 最近维护
 
 <!-- RECENT:START -->
+- **[damn-clock-in](https://github.com/luskyle/damn-clock-in)** · 最近推送 2026-11-23
+  暂未填写仓库简介。
 - **[luskyle](https://github.com/luskyle/luskyle)** · 最近推送 2026-11-22
   暂未填写仓库简介。
 - **[mmax-video](https://github.com/luskyle/mmax-video)** · 最近推送 2026-11-21
-  暂未填写仓库简介。
-- **[sing-japanese](https://github.com/luskyle/sing-japanese)** · 最近推送 2026-11-18
   暂未填写仓库简介。
 <!-- RECENT:END -->
 
@@ -107,5 +107,5 @@
 配置与部署方法见 [自动更新说明](./docs/automation.md)。
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-11-22（UTC）
+文档更新时间：2026-11-23（UTC）
 <!-- DOCUMENT_UPDATED:END -->
