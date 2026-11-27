@@ -3,8 +3,6 @@ export function escapeXml(value) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[character]);
 }
 
-const colors = ['#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#fb7185', '#22d3ee', '#c084fc', '#94a3b8'];
-
 function svg(title, description, width, height, body) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title desc">
 <title id="title">${escapeXml(title)}</title><desc id="desc">${escapeXml(description)}</desc>
@@ -17,20 +15,28 @@ function text(x, y, value, size = 14, fill = '#e2e8f0') {
   return `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}">${escapeXml(value)}</text>`;
 }
 
-export function renderBars(title, subtitle, entries) {
-  const rows = entries.slice(0, 8);
-  const max = Math.max(1, ...rows.map(([, value]) => value));
-  const body = rows.map(([label, value], index) => {
-    const y = 85 + index * 34;
-    const width = Math.round(value / max * 360);
-    return text(24, y + 15, label) +
-      `<rect x="170" y="${y}" width="${width}" height="20" rx="5" fill="${colors[index]}"/>` +
-      text(545, y + 15, value);
+export function renderStats(user, repositories) {
+  const stars = repositories.filter((repo) => !repo.fork)
+    .reduce((sum, repo) => sum + repo.stargazers_count, 0);
+  const entries = [
+    ['公开仓库', user.public_repos, '#38bdf8', 'M4 3h12v18H4zM8 7h4M8 11h4M8 15h4M16 8h4v13h-4'],
+    ['原创仓库获星', stars, '#a78bfa', 'm12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z'],
+    ['关注者', user.followers, '#34d399', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8M17 4a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87'],
+    ['正在关注', user.following, '#fbbf24', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8M17 8h6M20 5v6'],
+  ];
+  const cards = entries.map(([label, value, color, icon], index) => {
+    const x = 24 + index * 232;
+    const valueSize = Math.min(38, 170 / Math.max(1, String(value).length) / 0.65);
+    return `<g transform="translate(${x} 76)">` +
+      `<rect width="216" height="132" rx="14" fill="#162238" stroke="#29384e"/>` +
+      `<rect x="16" y="18" width="36" height="36" rx="10" fill="${color}" fill-opacity=".12"/>` +
+      `<path transform="translate(22 24)" d="${icon}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>` +
+      text(16, 94, value, valueSize) + text(16, 116, label, 12, '#94a3b8') +
+      `</g>`;
   }).join('');
-  return svg(title, entries.map(([label, value]) => `${label}: ${value}`).join('; '),
-    640, Math.max(145, 110 + rows.length * 34),
-    text(24, 35, title, 21) + text(24, 60, subtitle, 12, '#94a3b8') +
-    (rows.length ? body : text(24, 100, 'No public data available')));
+  return svg('GitHub 概览', entries.map(([label, value]) => `${label}: ${value}`).join('; '),
+    960, 232, text(24, 35, 'GitHub 概览', 21) +
+    text(24, 57, '公开资料 · 获星数统计原创仓库，包含已归档仓库', 12, '#94a3b8') + cards);
 }
 
 export function flattenDays(calendar) {
@@ -129,18 +135,18 @@ export function renderWeeklyCommits(contributions, calendar) {
   }).join(' ');
   const area = `${line} L${points.at(-1)[0]},${bottom} L${points[0][0]},${bottom} Z`;
   const markers = points.map(([x, y], index) =>
-    `<circle cx="${x}" cy="${y}" r="2.5" fill="#38bdf8"><title>Week of ${weeks[index]}: ${values[index]} commits</title></circle>`).join('');
+    `<circle cx="${x}" cy="${y}" r="2.5" fill="#38bdf8"><title>${weeks[index]} 当周：${values[index]} 次提交</title></circle>`).join('');
   const labels = weeks.map((week, index) => {
     const month = week.slice(0, 7);
     if (index > 0 && month === weeks[index - 1].slice(0, 7)) return '';
     const [x] = points[index];
     return text(x, 263, month, 10, '#94a3b8');
   }).join('');
-  return svg('Weekly Commit Frequency',
-    `Commits by week on GitHub's contribution graph. Default-branch contributions across up to 100 repositories. ${firstDate} through ${lastDate}.`,
+  return svg('每周提交频率',
+    `按周汇总 GitHub 贡献图中的提交数，统计最多 100 个仓库的默认分支贡献。${firstDate} 至 ${lastDate}。`,
     width, 286,
-    text(24, 35, 'Weekly Commit Frequency', 21) +
-    text(24, 59, `Default-branch commits · ${firstDate} — ${lastDate}`, 12, '#94a3b8') +
+    text(24, 35, '每周提交频率', 21) +
+    text(24, 59, `默认分支提交数 · ${firstDate} — ${lastDate}`, 12, '#94a3b8') +
     `<defs><linearGradient id="commit-area" x1="0" y1="0" x2="0" y2="1">` +
     `<stop offset="0" stop-color="#a78bfa" stop-opacity=".55"/><stop offset="1" stop-color="#34d399" stop-opacity=".08"/>` +
     `</linearGradient></defs>` +
@@ -150,12 +156,8 @@ export function renderWeeklyCommits(contributions, calendar) {
 }
 
 export function renderAssets(user, repositories, calendar, weeklyCommits) {
-  const original = repositories.filter((repo) => !repo.fork);
   return {
-    'stats.svg': renderBars('GitHub Overview', 'Public data · original repositories exclude forks', [
-      ['Public repos', user.public_repos], ['Followers', user.followers], ['Following', user.following],
-      ['Original stars', original.reduce((sum, repo) => sum + repo.stargazers_count, 0)],
-    ]),
+    'stats.svg': renderStats(user, repositories),
     ...(calendar ? {
       'commits.svg': renderWeeklyCommits(weeklyCommits, calendar),
       'snake.svg': renderSnake(calendar),

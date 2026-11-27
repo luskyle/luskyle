@@ -36,16 +36,6 @@ export function replaceSection(readme, name, content) {
   return `${readme.slice(0, startIndex + start.length)}\n${content}\n${readme.slice(endIndex)}`;
 }
 
-export function renderProfile(user, repositories) {
-  const stars = repositories.filter((repo) => !repo.fork)
-    .reduce((total, repo) => total + repo.stargazers_count, 0);
-  return [
-    '| 公开仓库 | Followers | Following | 原创仓库 Stars |',
-    '| ---: | ---: | ---: | ---: |',
-    `| ${user.public_repos} | ${user.followers} | ${user.following} | ${stars} |`,
-  ].join('\n');
-}
-
 export function renderRepositories(repositories, limit = 6) {
   const featured = repositories
     .filter((repo) => !repo.fork && !repo.archived)
@@ -94,7 +84,7 @@ export function validateConfig(config) {
 
 function renderFeaturedTable(repositories) {
   return [
-    '| 仓库 | 简介 | 语言 | Stars | Forks |',
+    '| 精选项目 | 简介 | 语言 | Stars | Forks |',
     '| --- | --- | --- | ---: | ---: |',
     ...repositories.map((repo) =>
       `| [${escapeMarkdown(repo.full_name || repo.name)}](${repo.html_url}) | ${escapeMarkdown(repo.description) || '暂未填写仓库简介。'} | ${escapeMarkdown(repo.language) || '资料 / 文档'} | ${repo.stargazers_count} | ${repo.forks_count ?? 0} |`),
@@ -138,7 +128,7 @@ export async function fetchPinnedRepositories(username, token, graphql = (body) 
 
 export function renderPinnedRepositories(repositories) {
   return repositories.length
-    ? '跟随 GitHub 主页置顶仓库，按置顶顺序展示。\n\n' + renderFeaturedTable(repositories)
+    ? renderFeaturedTable(repositories)
     : 'GitHub 主页暂无公开置顶仓库。可在主页 Customize your pins 中设置。';
 }
 
@@ -295,7 +285,7 @@ export async function updateReadme({
     ? await fetchPinnedRepositories(username, token, pinnedGraphql)
     : null;
   const sections = {
-    PROFILE: renderProfile(user, repositories),
+    PROFILE: '![GitHub 公开资料四格数据卡片](./assets/stats.svg)',
     REPOSITORIES: renderRepositories(repositories),
     FEATURED: pinned === null
       ? renderFeatured(repositories, config.featuredRepositories)

@@ -4,7 +4,7 @@ import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  escapeMarkdown, replaceSection, renderProfile, renderRepositories,
+  escapeMarkdown, replaceSection, renderRepositories,
   githubRequest, updateReadme,
   sectionNames,
 } from '../scripts/update-readme.mjs';
@@ -34,12 +34,6 @@ test('only marker contents are replaced; invalid and duplicate markers fail', ()
 
 test('Markdown table values cannot inject HTML, columns or extra lines', () => {
   assert.equal(escapeMarkdown('<b> x|y\n[z]*'), '&lt;b&gt; x\\|y \\[z\\]\\*');
-});
-
-test('stats count original stars, including archived but not forked repositories', () => {
-  const output = renderProfile({ public_repos: 3, followers: 4, following: 5 },
-    [repo(), repo({ archived: true, stargazers_count: 3 }), repo({ fork: true, stargazers_count: 100 })]);
-  assert.match(output, /\| 3 \| 4 \| 5 \| 5 \|/);
 });
 
 test('featured repos exclude forks/archives, sort by stars and recency, and cap at six', () => {
@@ -89,7 +83,10 @@ test('end-to-end update paginates, preserves static text and is idempotent', asy
     let updated = await readFile(readmePath, 'utf8');
     assert.ok(updated.startsWith('静态介绍\n'));
     assert.ok(updated.endsWith('\n静态结尾\n'));
-    assert.match(updated, /\| 101 \| 2 \| 3 \| 202 \|/);
+    assert.match(updated, /!\[GitHub 公开资料四格数据卡片\]\(\.\/assets\/stats\.svg\)/);
+    assert.doesNotMatch(updated, /\| 公开仓库 \|/);
+    const stats = await readFile(join(directory, 'assets', 'stats.svg'), 'utf8');
+    assert.match(stats, /公开仓库: 101; 原创仓库获星: 202; 关注者: 2; 正在关注: 3/);
     assert.match(updated, /文档更新时间：2026-10-13（UTC）/);
     assert.doesNotMatch(updated, /最近动态|最新文章|UPDATES:START|BLOG:START/);
     assert.doesNotMatch(updated, /ACTIVITY|PULL_REQUESTS|最近公开活动|最近 Pull Request/);

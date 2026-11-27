@@ -10,7 +10,7 @@ import {
   fetchPinnedRepositories, renderPinnedRepositories,
 } from '../scripts/update-readme.mjs';
 import {
-  escapeXml, renderBars, renderAssets, contributionStreaks, renderSnake, renderWeeklyCommits,
+  escapeXml, renderStats, renderAssets, contributionStreaks, renderSnake, renderWeeklyCommits,
 } from '../scripts/charts.mjs';
 
 const config = {
@@ -83,9 +83,10 @@ test('pinned repositories preserve order and include other owners and fork/archi
   assert.equal(repos[0].language, 'C++');
   assert.equal(repos[2].language, null);
   const output = renderPinnedRepositories(repos);
+  assert.ok(output.startsWith('| 精选项目 |'));
   assert.ok(output.indexOf('[other/demo]') < output.indexOf('[example/demo]'));
   assert.ok(output.includes('&lt;&amp;&gt;'));
-  assert.match(output, /\| 仓库 \| 简介 \| 语言 \| Stars \| Forks \|/);
+  assert.match(output, /\| 精选项目 \| 简介 \| 语言 \| Stars \| Forks \|/);
   assert.match(output, /\| C\+\+ \| 3 \| 1 \|/);
   assert.doesNotMatch(output, /example\/private/);
   assert.match(output, /资料 \/ 文档/);
@@ -112,7 +113,7 @@ test('featured table resolves configured repos and escapes Markdown', () => {
   const output = renderFeatured([repository], ['DEMO']);
   assert.match(output, /https:\/\/github.com\/example\/demo/);
   assert.ok(output.includes('&lt;&amp;&gt; \\| notes'));
-  assert.match(output, /\| 仓库 \| 简介 \| 语言 \| Stars \| Forks \|/);
+  assert.match(output, /\| 精选项目 \| 简介 \| 语言 \| Stars \| Forks \|/);
   assert.match(output, /\| C\+\+ \| 3 \| 1 \|/);
   assert.equal(output.split('\n').length, 3);
   assert.throws(() => renderFeatured([repository], ['missing']), /不存在/);
@@ -244,16 +245,31 @@ test('generated SVGs include a dated contribution snake and weekly commit chart'
   }
   assert.match(assets['snake.svg'], /animateMotion/);
   assert.match(assets['snake.svg'], /2026-10-05 — 2026-10-11/);
-  assert.match(assets['commits.svg'], /Weekly Commit Frequency/);
+  assert.match(assets['commits.svg'], /每周提交频率/);
+  assert.match(assets['stats.svg'], /GitHub 概览/);
   assert.match(assets['commits.svg'], /2026-10-05 — 2026-10-11/);
-  assert.match(assets['commits.svg'], /Week of 2026-10-04: 5 commits/);
+  assert.match(assets['commits.svg'], /2026-10-04 当周：5 次提交/);
+  assert.match(assets['commits.svg'], /默认分支提交数/);
+  assert.match(assets['stats.svg'], /公开资料 · 获星数统计原创仓库，包含已归档仓库/);
   assert.equal(XMLValidator.validate(assets['commits.svg']), true);
   assert.match(assets['snake.svg'], /animateMotion/);
-  assert.match(renderBars('Empty', '', []), /No public data/);
-  assert.match(renderBars('Zero', '', [['zero', 0]]), /width="0"/);
-  assert.doesNotMatch(renderBars('Huge', '', [['huge', 1_000_000]]), /NaN|Infinity/);
   assert.equal(escapeXml('<"&\'>'), '&lt;&quot;&amp;&apos;&gt;');
   assert.doesNotMatch(renderSnake({ totalContributions: 0, weeks: [] }), /animateMotion/);
+});
+
+test('stat cards preserve original star totals and support zero and large counts', () => {
+  const output = renderStats({ public_repos: 3, followers: 4, following: 0 }, [
+    { ...repository, stargazers_count: 2 },
+    { ...repository, archived: true, stargazers_count: 3 },
+    { ...repository, fork: true, stargazers_count: 100 },
+  ]);
+  assert.match(output, /公开仓库: 3; 原创仓库获星: 5; 关注者: 4; 正在关注: 0/);
+  assert.equal((output.match(/height="132"/g) ?? []).length, 4);
+  assert.equal((output.match(/<path transform=/g) ?? []).length, 4);
+  assert.equal(XMLValidator.validate(output), true);
+  const large = renderStats({ public_repos: 1_000_000_000, followers: 0, following: 0 }, []);
+  assert.doesNotMatch(large, /NaN|Infinity/);
+  assert.match(large, />1000000000<\/text>/);
 });
 
 test('weekly commit chart includes empty weeks and covers the calendar date range', () => {
@@ -265,8 +281,8 @@ test('weekly commit chart includes empty weeks and covers the calendar date rang
     { date: '2026-10-11', contributionCount: 0 },
   ] }] });
   assert.equal(XMLValidator.validate(output), true);
-  assert.match(output, /Week of 2026-10-11: 5 commits/);
-  assert.match(output, /Week of 2025-11-02: 0 commits/);
+  assert.match(output, /2026-10-11 当周：5 次提交/);
+  assert.match(output, /2025-11-02 当周：0 次提交/);
   assert.match(output, /2025-11-02 — 2026-10-11/);
   assert.match(output, /r="2\.5"/);
 });
@@ -282,13 +298,13 @@ test('weekly chart smoothly connects peaks and zero weeks with a filled area', (
   assert.ok(output.includes(`d="${line}" fill="none"`));
   assert.ok(output.includes(`d="${line} L936,238 L54,238 Z" fill="url(#commit-area)"`));
   assert.match(output, /stop-color="#a78bfa".*stop-color="#34d399"/);
-  assert.match(output, /Week of 2026-10-11: 10 commits/);
+  assert.match(output, /2026-10-11 当周：10 次提交/);
   assert.equal(XMLValidator.validate(output), true);
 
   const singleWeek = renderWeeklyCommits([], { weeks: [{ contributionDays: [
     { date: '2026-10-11', contributionCount: 0 },
   ] }] });
-  assert.match(singleWeek, /Week of 2026-10-11: 0 commits/);
+  assert.match(singleWeek, /2026-10-11 当周：0 次提交/);
   assert.doesNotMatch(singleWeek, /NaN|Infinity/);
   assert.equal(XMLValidator.validate(singleWeek), true);
 });

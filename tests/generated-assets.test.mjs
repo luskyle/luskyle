@@ -9,7 +9,8 @@ test('checked-in README images resolve to valid accessible local SVGs', async ()
   const readme = await readFile(new URL('README.md', root), 'utf8');
   const images = [...readme.matchAll(/!\[([^\]]+)\]\(\.\/assets\/([a-z-]+\.svg)\)/g)];
   assert.ok(images.length >= 3);
-  assert.match(readme, /^<!-- CONTRIBUTIONS:START -->\s*!\[[^\]]+\]\(\.\/assets\/snake\.svg\)/);
+  assert.match(readme, /^<!-- PROFILE:START -->\s*!\[[^\]]+\]\(\.\/assets\/stats\.svg\)\s*<!-- PROFILE:END -->\s*<!-- CONTRIBUTIONS:START -->\s*!\[[^\]]+\]\(\.\/assets\/snake\.svg\)/);
+  assert.equal(images.filter(([, , name]) => name === 'stats.svg').length, 1);
   assert.doesNotMatch(readme, /banner\.svg/);
   assert.doesNotMatch(readme, /你好，我是|渺万里层云|欢迎来到|ABOUT:|关注方向|正在做|正在学|文字与统计图每|动态区域外的文字|配置与部署方法见/);
   for (const [, alt, name] of images) {
