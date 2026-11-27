@@ -8,7 +8,7 @@ const defaultReadme = fileURLToPath(new URL('../README.md', import.meta.url));
 const defaultConfig = fileURLToPath(new URL('../profile.config.json', import.meta.url));
 export const sectionNames = [
   'PROFILE', 'REPOSITORIES', 'FEATURED', 'RECENT', 'RELEASES',
-  'CONTRIBUTIONS', 'COMMITS', 'ABOUT', 'CONTACT', 'DOCUMENT_UPDATED',
+  'CONTRIBUTIONS', 'COMMITS', 'CONTACT', 'DOCUMENT_UPDATED',
 ];
 
 export function escapeMarkdown(value) {
@@ -89,23 +89,25 @@ export function validateConfig(config) {
   if (!config.featuredRepositories.every((name) => /^[a-z\d_.-]+$/i.test(name))) {
     throw new Error('精选仓库名称无效。');
   }
-  for (const key of ['focus', 'learning', 'workingOn']) {
-    if (typeof config[key] !== 'string') throw new Error(`配置 ${key} 必须是字符串。`);
-  }
   return config;
 }
 
-function renderFeaturedCard(repo) {
-  return `### [${escapeMarkdown(repo.full_name || repo.name)}](${repo.html_url})\n\n${escapeMarkdown(repo.description) || '暂未填写仓库简介。'}\n\n**${escapeMarkdown(repo.language) || '资料 / 文档'}** · ⭐ ${repo.stargazers_count} · Forks ${repo.forks_count ?? 0}`;
+function renderFeaturedTable(repositories) {
+  return [
+    '| 仓库 | 简介 | 语言 | Stars | Forks |',
+    '| --- | --- | --- | ---: | ---: |',
+    ...repositories.map((repo) =>
+      `| [${escapeMarkdown(repo.full_name || repo.name)}](${repo.html_url}) | ${escapeMarkdown(repo.description) || '暂未填写仓库简介。'} | ${escapeMarkdown(repo.language) || '资料 / 文档'} | ${repo.stargazers_count} | ${repo.forks_count ?? 0} |`),
+  ].join('\n');
 }
 
 export function renderFeatured(repositories, names) {
   if (!names.length) return '尚未配置精选项目。';
-  return names.map((name) => {
+  return renderFeaturedTable(names.map((name) => {
     const repo = repositories.find((item) => item.name.toLowerCase() === name.toLowerCase());
     if (!repo) throw new Error(`精选仓库 ${name} 不存在或不是此账号的公开仓库。`);
-    return renderFeaturedCard(repo);
-  }).join('\n\n');
+    return repo;
+  }));
 }
 
 export async function fetchPinnedRepositories(username, token, graphql = (body) => githubRequest('/graphql', token, fetch, body)) {
@@ -136,7 +138,7 @@ export async function fetchPinnedRepositories(username, token, graphql = (body) 
 
 export function renderPinnedRepositories(repositories) {
   return repositories.length
-    ? '跟随 GitHub 主页置顶仓库，按置顶顺序展示。\n\n' + repositories.map(renderFeaturedCard).join('\n\n')
+    ? '跟随 GitHub 主页置顶仓库，按置顶顺序展示。\n\n' + renderFeaturedTable(repositories)
     : 'GitHub 主页暂无公开置顶仓库。可在主页 Customize your pins 中设置。';
 }
 
@@ -306,7 +308,6 @@ export async function updateReadme({
     COMMITS: calendar
       ? '![过去一年每周提交频率折线图](./assets/commits.svg)'
       : '未配置 `GITHUB_TOKEN` 或 `CONTRIBUTIONS_TOKEN`，无法生成每周提交频率图。',
-    ABOUT: `- **关注方向：** ${escapeMarkdown(config.focus) || '待补充'}\n- **正在做：** ${escapeMarkdown(config.workingOn) || '维护下方列出的公开项目；具体计划待补充。'}\n- **正在学：** ${escapeMarkdown(config.learning) || '待补充（不根据仓库语言推断学习计划）。'}`,
     CONTACT: `[GitHub · ${escapeMarkdown(user.login)}](https://github.com/${user.login})` +
       (user.email ? ` · [公开邮箱](mailto:${encodeURIComponent(user.email)})` : '') +
       (user.blog && /^https?:\/\//i.test(user.blog) ? ` · [个人网站](<${new URL(user.blog).href}>)` : ''),

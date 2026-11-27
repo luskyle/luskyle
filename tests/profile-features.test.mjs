@@ -10,12 +10,11 @@ import {
   fetchPinnedRepositories, renderPinnedRepositories,
 } from '../scripts/update-readme.mjs';
 import {
-  escapeXml, renderBars, renderAssets, contributionStreaks, renderSnake, renderWeeklyCommits, renderBanner,
+  escapeXml, renderBars, renderAssets, contributionStreaks, renderSnake, renderWeeklyCommits,
 } from '../scripts/charts.mjs';
 
 const config = {
   featuredRepositories: ['demo'],
-  focus: 'Developer tools', workingOn: '', learning: '',
 };
 const repository = {
   name: 'demo', html_url: 'https://github.com/example/demo', description: 'Tools <&> | notes',
@@ -55,7 +54,6 @@ test('profile configuration validates arrays, safe repo names and HTTPS feeds', 
   assert.deepEqual(validateConfig(config), config);
   for (const invalid of [
     { featuredRepositories: null }, { featuredRepositories: ['../secret'] },
-    { learning: 42 },
     { featuredSource: 'unknown' },
   ]) {
     assert.throws(() => validateConfig({ ...config, ...invalid }));
@@ -87,7 +85,8 @@ test('pinned repositories preserve order and include other owners and fork/archi
   const output = renderPinnedRepositories(repos);
   assert.ok(output.indexOf('[other/demo]') < output.indexOf('[example/demo]'));
   assert.ok(output.includes('&lt;&amp;&gt;'));
-  assert.match(output, /⭐ 3 · Forks 1/);
+  assert.match(output, /\| 仓库 \| 简介 \| 语言 \| Stars \| Forks \|/);
+  assert.match(output, /\| C\+\+ \| 3 \| 1 \|/);
   assert.doesNotMatch(output, /example\/private/);
   assert.match(output, /资料 \/ 文档/);
 });
@@ -109,11 +108,13 @@ test('empty pins are distinct from missing token, GraphQL errors and malformed r
   })), /置顶仓库请求失败：Denied/);
 });
 
-test('featured cards resolve configured repos and escape Markdown', () => {
+test('featured table resolves configured repos and escapes Markdown', () => {
   const output = renderFeatured([repository], ['DEMO']);
   assert.match(output, /https:\/\/github.com\/example\/demo/);
   assert.ok(output.includes('&lt;&amp;&gt; \\| notes'));
-  assert.match(output, /⭐ 3 · Forks 1/);
+  assert.match(output, /\| 仓库 \| 简介 \| 语言 \| Stars \| Forks \|/);
+  assert.match(output, /\| C\+\+ \| 3 \| 1 \|/);
+  assert.equal(output.split('\n').length, 3);
   assert.throws(() => renderFeatured([repository], ['missing']), /不存在/);
   assert.match(renderFeatured([], []), /尚未配置/);
 });
@@ -233,7 +234,7 @@ test('generated SVGs include a dated contribution snake and weekly commit chart'
     { occurredAt: '2026-10-06T00:00:00Z', commitCount: 3 },
   ] };
   const assets = renderAssets(user, [repository], calendar, stats.commits);
-  assert.equal(Object.keys(assets).length, 4);
+  assert.equal(Object.keys(assets).length, 3);
   for (const [name, content] of Object.entries(assets)) {
     assert.equal(XMLValidator.validate(content), true, name);
     assert.match(content, /<title id="title">/);
@@ -248,14 +249,6 @@ test('generated SVGs include a dated contribution snake and weekly commit chart'
   assert.match(assets['commits.svg'], /Week of 2026-10-04: 5 commits/);
   assert.equal(XMLValidator.validate(assets['commits.svg']), true);
   assert.match(assets['snake.svg'], /animateMotion/);
-  const luskyleBanner = renderBanner({ login: 'luskyle', name: 'Luskyle' });
-  assert.match(luskyleBanner, />Luskyle<\/text>/);
-  assert.doesNotMatch(luskyleBanner, /Developer tools|Browser extensions|>LK<\/text>/);
-  assert.match(luskyleBanner, /Ten thousand miles of layered clouds\.<\/text><text x="40" y="180".*A thousand peaks wear snow at dusk\./);
-  assert.match(luskyleBanner, /OPEN SOURCE/);
-  assert.match(luskyleBanner, /SYSTEMS ENGINEERING/);
-  assert.match(luskyleBanner, /AUTOMATION/);
-  assert.match(luskyleBanner, /BUILT TO LAST/);
   assert.match(renderBars('Empty', '', []), /No public data/);
   assert.match(renderBars('Zero', '', [['zero', 0]]), /width="0"/);
   assert.doesNotMatch(renderBars('Huge', '', [['huge', 1_000_000]]), /NaN|Infinity/);
@@ -278,20 +271,26 @@ test('weekly commit chart includes empty weeks and covers the calendar date rang
   assert.match(output, /r="2\.5"/);
 });
 
-test('redesigned banner uses a circuit monogram, escapes names and fits longer names', () => {
-  const banner = renderBanner({ login: 'luskyle', name: 'Luskyle' });
-  assert.equal(XMLValidator.validate(banner), true);
-  assert.match(banner, /viewBox="0 0 960 280"/);
-  assert.match(banner, />Luskyle<\/text>/);
-  assert.match(banner, /id="grid"/);
-  assert.match(banner, /id="typing"/);
-  assert.doesNotMatch(banner, /cx="870"|<image|<script/);
-  const escaped = renderBanner({ login: 'example', name: '<A & B>' });
-  assert.match(escaped, /&lt;A &amp; B&gt;/);
-  assert.match(escaped, />EX<\/text>/);
-  const long = renderBanner({ login: 'example', name: 'A'.repeat(50) });
-  assert.match(long, /font-size="16\.615/);
-  assert.equal(XMLValidator.validate(long), true);
+test('weekly chart smoothly connects peaks and zero weeks with a filled area', () => {
+  const output = renderWeeklyCommits([
+    { occurredAt: '2026-10-11T00:00:00Z', commitCount: 10 },
+  ], { weeks: [{ contributionDays: [
+    { date: '2026-10-04', contributionCount: 0 },
+    { date: '2026-10-18', contributionCount: 0 },
+  ] }] });
+  const line = 'M54,238 C274.5,238 274.5,82 495,82 C715.5,82 715.5,238 936,238';
+  assert.ok(output.includes(`d="${line}" fill="none"`));
+  assert.ok(output.includes(`d="${line} L936,238 L54,238 Z" fill="url(#commit-area)"`));
+  assert.match(output, /stop-color="#a78bfa".*stop-color="#34d399"/);
+  assert.match(output, /Week of 2026-10-11: 10 commits/);
+  assert.equal(XMLValidator.validate(output), true);
+
+  const singleWeek = renderWeeklyCommits([], { weeks: [{ contributionDays: [
+    { date: '2026-10-11', contributionCount: 0 },
+  ] }] });
+  assert.match(singleWeek, /Week of 2026-10-11: 0 commits/);
+  assert.doesNotMatch(singleWeek, /NaN|Infinity/);
+  assert.equal(XMLValidator.validate(singleWeek), true);
 });
 
 test('full update writes every section and chart; repeated update is unchanged; failure preserves files', async () => {
@@ -318,11 +317,12 @@ test('full update writes every section and chart; repeated update is unchanged; 
     assert.match(result, /每周提交频率/);
     assert.doesNotMatch(result, /最近公开活动|公开活动数量|语言分布|最近 Pull Request|开源贡献/);
     assert.doesNotMatch(result, /最近动态|最新文章|UPDATES:START|BLOG:START/);
+    assert.doesNotMatch(result, /ABOUT:|关注方向|正在做|正在学/);
     assert.doesNotMatch(result, /<details>|<summary>/);
     assert.match(result, /mailto:public%40example\.com/);
     assert.match(result, /https:\/\/example\.com/);
     const assetNames = await readdir(join(directory, 'assets'));
-    assert.equal(assetNames.length, 4);
+    assert.equal(assetNames.length, 3);
     const previousAssets = await Promise.all(assetNames.map((name) =>
       readFile(join(directory, 'assets', name), 'utf8')));
     assert.equal(await updateReadme(options), false);

@@ -17,51 +17,6 @@ function text(x, y, value, size = 14, fill = '#e2e8f0') {
   return `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}">${escapeXml(value)}</text>`;
 }
 
-export function renderBanner(user) {
-  const name = user.name || user.login;
-  const monogram = user.login.toLowerCase() === 'luskyle' ? 'LK' : user.login.slice(0, 2).toUpperCase();
-  const mark = user.login.toLowerCase() === 'luskyle' ? 'Luskyle' : monogram;
-  const markSize = mark.length > 2 ? 20 : 42;
-  const nameSize = Math.min(44, 540 / Math.max(1, Array.from(name).length) / 0.65);
-  const tags = [
-    ['OPEN SOURCE', 110, '#172a3c', '#7dd3fc'],
-    ['SYSTEMS ENGINEERING', 154, '#20233b', '#c4b5fd'],
-    ['AUTOMATION', 112, '#14312e', '#6ee7b7'],
-    ['BUILT TO LAST', 115, '#332b20', '#fcd34d'],
-  ];
-  let tagX = 40;
-  const tagMarkup = tags.map(([label, width, background, foreground]) => {
-    const x = tagX;
-    tagX += width + 9;
-    return `<rect x="${x}" y="222" width="${width}" height="27" rx="7" fill="${background}"/>` +
-      text(x + 9, 240, label, 10, foreground);
-  }).join('');
-  return svg(`Hello, ${name}`, `${name}'s open-source workshop.`, 960, 280,
-    `<defs>
-<linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111e36"/><stop offset="1" stop-color="#0b1220"/></linearGradient>
-<linearGradient id="accent"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#34d399"/></linearGradient>
-<pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#334155" stroke-opacity=".22"/></pattern>
-<clipPath id="typing"><rect x="40" y="143" width="530" height="48"><animate attributeName="width" values="0;530;530;0" keyTimes="0;.4;.9;1" dur="10s" repeatCount="indefinite"/></rect></clipPath>
-</defs>
-<rect width="960" height="280" rx="20" fill="url(#surface)"/>
-<rect x="625" y="16" width="319" height="248" rx="16" fill="url(#grid)"/>
-<rect x="40" y="35" width="4" height="16" rx="2" fill="#34d399"/>
-${text(56, 48, 'THE OPEN-SOURCE WORKSHOP', 12, '#94a3b8')}
-${text(40, 84, "Hi, I'm", 18, '#94a3b8')}
-${text(40, 131, name, nameSize)}
-<g clip-path="url(#typing)">${text(40, 158, 'Ten thousand miles of layered clouds.', 15, '#38bdf8')}${text(40, 180, 'A thousand peaks wear snow at dusk.', 15, '#38bdf8')}</g>
-${tagMarkup}
-<g fill="none" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".75">
-<path d="M720 109H680L657 86H638M720 139H655M720 169H680L650 199H638M836 109H862L886 85H918M836 139H918M836 169H865L894 198H918M756 81V57L734 35M800 81V52H827M756 197V224H730M800 197V237H829"/>
-</g>
-<g fill="#38bdf8"><circle cx="638" cy="86" r="3"/><circle cx="655" cy="139" r="3"/><circle cx="638" cy="199" r="3"/><circle cx="918" cy="85" r="3"/><circle cx="918" cy="139" r="3"/><circle cx="918" cy="198" r="3"/></g>
-<rect x="720" y="81" width="116" height="116" rx="22" fill="#122235" stroke="url(#accent)" stroke-width="2"/>
-<rect x="730" y="91" width="96" height="96" rx="15" fill="#0f172a" stroke="#334155"/>
-<text x="778" y="151" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="${markSize}" fill="#e2e8f0">${escapeXml(mark)}</text>
-<rect x="765" y="166" width="26" height="3" rx="1.5" fill="#34d399"/>
-${text(748, 262, '</>  CREATE', 12, '#94a3b8')}`);
-}
-
 export function renderBars(title, subtitle, entries) {
   const rows = entries.slice(0, 8);
   const max = Math.max(1, ...rows.map(([, value]) => value));
@@ -166,7 +121,13 @@ export function renderWeeklyCommits(contributions, calendar) {
     return `<path d="M${left} ${y}H${right}" stroke="#334155" stroke-width="1"/>` +
       text(16, y + 4, value, 10, '#94a3b8');
   }).join('');
-  const line = points.map(([x, y], index) => `${index ? 'L' : 'M'}${x},${y}`).join(' ');
+  const line = points.map(([x, y], index) => {
+    if (index === 0) return `M${x},${y}`;
+    const [previousX, previousY] = points[index - 1];
+    const midpointX = (previousX + x) / 2;
+    return `C${midpointX},${previousY} ${midpointX},${y} ${x},${y}`;
+  }).join(' ');
+  const area = `${line} L${points.at(-1)[0]},${bottom} L${points[0][0]},${bottom} Z`;
   const markers = points.map(([x, y], index) =>
     `<circle cx="${x}" cy="${y}" r="2.5" fill="#38bdf8"><title>Week of ${weeks[index]}: ${values[index]} commits</title></circle>`).join('');
   const labels = weeks.map((week, index) => {
@@ -180,14 +141,17 @@ export function renderWeeklyCommits(contributions, calendar) {
     width, 286,
     text(24, 35, 'Weekly Commit Frequency', 21) +
     text(24, 59, `Default-branch commits · ${firstDate} — ${lastDate}`, 12, '#94a3b8') +
-    grid + `<path d="${line}" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<defs><linearGradient id="commit-area" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0" stop-color="#a78bfa" stop-opacity=".55"/><stop offset="1" stop-color="#34d399" stop-opacity=".08"/>` +
+    `</linearGradient></defs>` +
+    grid + `<path d="${area}" fill="url(#commit-area)"/>` +
+    `<path d="${line}" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
     markers + labels);
 }
 
 export function renderAssets(user, repositories, calendar, weeklyCommits) {
   const original = repositories.filter((repo) => !repo.fork);
   return {
-    'banner.svg': renderBanner(user),
     'stats.svg': renderBars('GitHub Overview', 'Public data · original repositories exclude forks', [
       ['Public repos', user.public_repos], ['Followers', user.followers], ['Following', user.following],
       ['Original stars', original.reduce((sum, repo) => sum + repo.stargazers_count, 0)],

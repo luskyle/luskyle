@@ -82,8 +82,7 @@ test('end-to-end update paginates, preserves static text and is idempotent', asy
     };
     const options = {
       username: 'example', readmePath, request, token: '',
-      config: { featuredRepositories: ['demo'],
-        focus: 'Tools', workingOn: '', learning: '' },
+      config: { featuredRepositories: ['demo'] },
       now: () => new Date('2026-10-13T15:00:00.000Z'),
     };
     assert.equal(await updateReadme(options), true);
