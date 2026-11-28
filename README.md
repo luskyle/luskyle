@@ -59,5 +59,5 @@
 <!-- CONTACT:END -->
 
 <!-- DOCUMENT_UPDATED:START -->
-文档更新时间：2026-11-27（UTC）
+文档更新时间：2026-11-28（UTC）
 <!-- DOCUMENT_UPDATED:END -->
